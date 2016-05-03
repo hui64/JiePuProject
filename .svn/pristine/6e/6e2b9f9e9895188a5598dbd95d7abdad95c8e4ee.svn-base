@@ -1,0 +1,64 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class LoopScrollRect : ScrollRect {
+    private GameObject Grid;
+    private float DictanceY = 0;
+    private float TopY = 0;
+    private float BottomY = 0;
+    private Transform[] ChildTrans;
+    private Transform First;
+    private Transform Last;
+    void Awake() {
+        Init();
+    }
+    private void Init() {
+        Grid = content.gameObject;
+        RectTransform gridRec = Grid.GetComponent<RectTransform>();
+        SetDistance(gridRec);
+        GetChildTransforms(Grid);
+        onValueChanged.AddListener(OnValueChanged);
+    }
+    //设置上边界跟下边界 间距
+    private void SetDistance(RectTransform RTran) {
+        DictanceY = RTran.sizeDelta.y;
+        if (RTran.pivot == new Vector2(0.5f, 0.5f))
+        {
+            TopY = 0.5f * DictanceY;
+            BottomY = -TopY;
+        }
+        if (RTran.pivot == new Vector2(0.5f, 1f))
+        {
+            BottomY = -DictanceY;
+        }
+    }
+    //获取子物体的Transform
+    private void GetChildTransforms(GameObject grid) {
+        int childNum = Grid.transform.childCount;
+        ChildTrans = new Transform[childNum];
+        for (int i = 0; i < childNum; i++) {
+            ChildTrans[i] = Grid.transform.GetChild(i);
+        }
+        First = ChildTrans[0];
+        Last = ChildTrans[childNum - 1];
+    }
+    private float ChangY = 0;
+    private float OldY = 1f;
+    //拖拽时调用
+    private void OnValueChanged(Vector2 move) {
+        ChangY = move.y - OldY;
+        if (ChangY >= 0.1f)
+        {
+            OldY = move.y;
+            ChangY = 0;
+        }
+        if (ChangY <= -0.1)
+        {
+            OldY = move.y;
+            ChangY = 0;
+        }
+    }
+    //第一个移动到最后一个
+	
+}

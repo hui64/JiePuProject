@@ -1,0 +1,109 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System;
+public class openweb : MonoBehaviour {
+    Vector2 center = new Vector2(1623, 364);
+    int z = 13;
+    int size = 256;
+
+    List<Vector2> point = new List<Vector2>();
+    List<Vector2> point6 = new List<Vector2>();
+    List<string> head = new List<string>();
+    // Use this for initialization
+    void Start () {
+        point.Add(new Vector2(116.403878f, 39.915179f));
+        head.Add("head.h_shandianbing");
+        point.Add(new Vector2(117.217491f, 39.145094f));
+        head.Add("head.h_guojingfangweibing");
+        point.Add(new Vector2(104.072272f, 30.663586f));
+        head.Add("head.h_jiesensitansen");
+        point.Add(new Vector2(121.509101f, 31.243421f));
+        head.Add("head.h_leidianzhongjiezhe");
+        point.Add(new Vector2(119.278788f, 26.065128f));
+        head.Add("head.h_meiguoduichang");
+        point.Add(new Vector2(118.155906f, 24.443327f));
+        head.Add("head.h_youna");
+        StartCoroutine(_RequestCoords6(point, (w) =>
+        {
+           // point6 = _OnReceiveCoords6(w);
+            StartCoroutine(LoadImg(new Vector2(5000, 5000), (www) =>
+            {
+                //GetComponent<Renderer>().material.mainTexture = (Texture)www.texture;
+                Debug.Log("1111111111111111111111111111111111111");
+                Texture2D texture2D = www.texture;
+                byte[] bytes = texture2D.EncodeToPNG();
+                System.IO.File.WriteAllBytes(Application.streamingAssetsPath + "mapimage.png", bytes);
+            }));
+        }));
+
+    }
+	
+	// Update is called once per frame
+	void Update () {
+	
+	}
+
+
+    List<WWW> wwwList = new List<WWW>();
+    private IEnumerator LoadImg(Vector2 v2, Action<WWW> callback)
+    {
+        string url = string.Format("http://online2.map.bdimg.com/tile/?qt=tile&x={0}&y={1}&z={2}&styles=pl&udt=20140928", (int)v2.x, (int)v2.y, 1);
+        WWW www = new WWW(url);
+        wwwList.Add(www);
+        yield return www;
+        if (!wwwList.Contains(www))
+        {
+            yield return null;
+        }
+        else if (!string.IsNullOrEmpty(www.error))
+        {
+            Debug.LogError(string.Format("{0}: {1}", www.error, url));
+            yield return null;
+        }
+        else
+        {
+            if (callback != null)
+            {
+                callback(www);
+            }
+            if (www.assetBundle != null)
+            {
+                www.assetBundle.Unload(false);
+            }
+        }
+    }
+    public IEnumerator _RequestCoords6(List<Vector2> from, Action<WWW> callback)
+    {
+        string coords = string.Empty;
+        for (int i = 0; i < from.Count; ++i)
+        {
+            Vector2 lonlat = from[i];
+            if (i > 0)
+            {
+                coords += ";";
+            }
+            coords += string.Format("{0},{1}", lonlat.x, lonlat.y);
+        }
+        string url = string.Format(@"http://api.map.baidu.com/geoconv/v1/?coords={0}&from=5&to=6&ak=EEde6682c409600b3902c3b65523a21a", coords);
+        WWW www = new WWW(url);
+        yield return www;
+
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            Debug.LogError(string.Format("{0}: {1}", www.error, url));
+            yield return null;
+        }
+        else
+        {
+            if (callback != null)
+            {
+                callback(www);
+            }
+            if (www.assetBundle != null)
+            {
+                www.assetBundle.Unload(false);
+            }
+        }
+    }
+}

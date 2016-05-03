@@ -1,0 +1,136 @@
+﻿using UnityEngine;
+using System.Collections;
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+using UnityEngine.UI;
+
+public enum Pivot
+{
+    TopLeft,
+    Top,
+    TopRight,
+    Left,
+    Center,
+    Right,
+    BottomLeft,
+    Bottom,
+    BottomRight,
+}
+
+public class UITools  {
+#if UNITY_EDITOR
+    [MenuItem("UI/Panel &p")]
+    static void exePanel()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Panel");
+        AddUIProperty(widget);
+    }
+
+    [MenuItem("UI/Button &b")]
+    static void exeButton()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Button");
+        UIProperty hup = AddUIProperty(widget);
+        hup.label = widget.GetComponentInChildren<Text>();
+    }
+
+    [MenuItem("UI/Text &T")]
+    static void exeText()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/text");
+        UIProperty hup = AddUIProperty(widget);
+        hup.label = widget.GetComponent<Text>();
+    }
+    [MenuItem("UI/Image &i")]
+    static void exeImage()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Image");
+        UIProperty hup = AddUIProperty(widget);
+        hup.sprite = widget.GetComponent<Image>();
+    }
+
+    [MenuItem("UI/RawImage &r")]
+    static void exeRawImage()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/RawImage");
+        AddUIProperty(widget);
+    }
+
+    [MenuItem("UI/Slider &s")]
+    static void exeSlider()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Slider");
+        AddUIProperty(widget);
+    }
+
+    [MenuItem("UI/Scrollbar &s")]
+    static void exeScrollbar()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Scrollbar");
+        AddUIProperty(widget);
+    }
+    [MenuItem("UI/Toggle &f")]
+    static void exeToggle()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Toggle");
+        AddUIProperty(widget);
+    }
+    [MenuItem("UI/InputField &f")]
+    static void exeInputField()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/InputField");
+        UIProperty hup = AddUIProperty(widget);
+        hup.label = widget.GetComponentInChildren<Text>();
+    }
+    [MenuItem("UI/ScrollView &f")]
+    static void exeScrollView()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/ScrollView");
+        AddUIProperty(widget);
+    }
+    [MenuItem("UI/Grid &g")]
+    static void exeGrid()
+    {
+        GameObject widget = UIBase.ShowUI("BaseWidget/Grid");
+        AddUIProperty(widget);
+    }
+    static UIProperty AddUIProperty(GameObject go)
+    {
+        UIProperty hup = go.AddComponent<UIProperty>();
+        //hup.SetAnchor(Pivot.TopLeft);
+        if (Selection.activeTransform != null)
+        {
+            UIProperty parent = Selection.activeTransform.GetComponent<UIProperty>();
+            if (parent != null)
+            {
+                hup.gameObject.transform.SetParent(parent.transform,false);
+                hup.Parent = parent;
+                parent.Children.Add(hup);
+                hup.ID = parent.ID +"_"+ hup.gameObject.name;
+            }
+            else
+            {
+                hup.ID = hup.gameObject.name;
+            }
+        }
+        else
+        {
+            hup.ID = hup.gameObject.name;
+        }
+        Selection.activeTransform = hup.transform;
+        return hup;
+    }
+
+    [MenuItem("UI/CheckChild")]
+    static void CheckChild()
+    {
+        UIProperty parent = Selection.activeTransform.GetComponent<UIProperty>();
+		parent.CheckChild2();
+    }
+    static void CheckCanvas()
+    { 
+    
+    }
+#endif
+}

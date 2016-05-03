@@ -1,0 +1,161 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.UI;
+
+public class UIMainShow : BaseMonoBehaviour {
+    private GameObject ScrollShow;
+    private ScrollRect ShowRect;
+    private Transform Middle;
+    private Transform Show;
+    private Transform Top;
+    private GameObject Goods;
+    private Transform TopEmpty;
+    private Transform MiddleEmpty;
+    private Transform Bottom;
+    private GameObject TuiJianShow;
+    private GameObject GuangJieShow;
+    private GameObject HistoryShow;
+    private GameObject OwnShow;
+    private GameObject TuiJianMenu;
+    private GameObject GuangjieMenu;
+    private GameObject HistoryMenu;
+    private GameObject OwnMenu;
+    private List<RectTransform> ScrollMasks;
+    private GameObject StoreShow;
+    private GameObject TopGrid;
+    private GameObject GuangJieGrid;
+    private GameObject mapbutton;
+    //9/16
+    void Awake() {
+        Init();
+    }
+    void Start() {
+        AddScrollMasks();
+        GameTools.SetPosAndMaskByScreen(ScrollMasks); //自适应
+        AddListen();
+    }
+    private void AddListen() {
+        EventTriggerListener.Get(TuiJianMenu).onClick = ClickBottomMenu;
+        EventTriggerListener.Get(GuangjieMenu).onClick = ClickBottomMenu;
+        EventTriggerListener.Get(HistoryMenu).onClick = ClickBottomMenu;
+        EventTriggerListener.Get(OwnMenu).onClick = ClickBottomMenu;
+        EventTriggerListener.Get(mapbutton).onClick = GameTools.ClickMap;
+        GameTools.AddChildListen(TuiJianShow.transform.FindChild("show/goods/grid").gameObject, ClickStore);
+        GameTools.AddChildListen(GuangJieGrid, ClickStore);
+        GameTools.AddChildListen(HistoryShow.transform.FindChild("show/goods/grid").gameObject, ClickStore);
+        GameTools.AddChildListen(TopGrid, ClickTopMenu);
+    }
+    private void AddScrollMasks() {
+        ScrollMasks = new List<RectTransform>();
+        ScrollMasks.Add(TuiJianShow.GetComponent<RectTransform>());
+        ScrollMasks.Add(GuangJieShow.GetComponent<RectTransform>());
+        ScrollMasks.Add(HistoryShow.GetComponent<RectTransform>());
+        ScrollMasks.Add(OwnShow.GetComponent<RectTransform>());
+    }
+    private void Init() {
+        ScrollShow = transform.FindChild("guangjie").gameObject;
+        ShowRect = ScrollShow.GetComponent<ScrollRect>();
+        Show = ScrollShow.transform.FindChild("guangjie");
+        Top = ScrollShow.transform.FindChild("show/top");
+        Middle = ScrollShow.transform.FindChild("show/middle/middle");
+        TopEmpty = ScrollShow.transform.FindChild("top");
+        MiddleEmpty = ScrollShow.transform.FindChild("show/middle");
+        Bottom = transform.FindChild("bottom");
+        GameTools.AddChangeTransform(Bottom.transform);
+        TuiJianMenu = Bottom.transform.FindChild("menu0/items/tuijian").gameObject;
+        GuangjieMenu = Bottom.transform.FindChild("menu0/items/guangjie").gameObject;
+        ChooseDownMenu = GuangjieMenu;
+        HistoryMenu = Bottom.transform.FindChild("menu0/items/history").gameObject;
+        OwnMenu = Bottom.transform.FindChild("menu0/items/own").gameObject;
+        TuiJianShow = transform.FindChild("tuijian").gameObject;
+        ChooseShow = GuangJieShow = transform.FindChild("guangjie").gameObject;
+        HistoryShow = transform.FindChild("history").gameObject;
+        OwnShow = transform.FindChild("own").gameObject;
+        StoreShow = transform.parent.FindChild("store/store").gameObject;
+        TopGrid = Top.FindChild("grid").gameObject;
+        GuangJieGrid = GuangJieShow.transform.FindChild("show/goods/grid").gameObject;
+        mapbutton = transform.FindChild("top/mapbutton").gameObject;
+    }
+    private bool IsChange = false;
+    //滑动时调用
+    public void OnValueChange(Vector2 value) {
+        if (Middle.position.y > TopEmpty.position.y) {
+            if (!IsChange)
+            {
+                Middle.parent = TopEmpty;
+                Middle.localPosition = Vector3.zero;
+                IsChange = true;
+            }
+           
+        }
+        if (MiddleEmpty.position.y < TopEmpty.position.y)
+        {
+            if (IsChange)
+            {
+                Middle.parent = MiddleEmpty;
+                Middle.localPosition = Vector3.zero;
+                IsChange = false;
+            }
+        }
+    }
+    private GameObject ChooseDownMenu;
+    private GameObject ChooseShow;
+    //点击下部的菜单按钮
+    public void ClickBottomMenu(GameObject button) {
+        //点击选择的图片返回
+        if (ChooseDownMenu.name.Equals(button.name))
+            return;
+        //点击推荐
+        if (button.name.Equals("tuijian")) {
+            ChooseDownMenu = GameTools.ClickChangeButton(ChooseDownMenu, button);
+            ChooseShow = GameTools.ClickChangeShow(ChooseShow, TuiJianShow);
+            return;
+        }
+        //点击逛街
+        if (button.name.Equals("guangjie"))
+        {
+            ChooseDownMenu = GameTools.ClickChangeButton(ChooseDownMenu, button);
+            ChooseShow = GameTools.ClickChangeShow(ChooseShow, GuangJieShow);
+            return;
+        }
+        //点击历史
+        if (button.name.Equals("history"))
+        {
+            ChooseDownMenu = GameTools.ClickChangeButton(ChooseDownMenu, button);
+            ChooseShow = GameTools.ClickChangeShow(ChooseShow, HistoryShow);
+            return;
+        }
+        //点击我
+        if (button.name.Equals("own"))
+        {
+            ChooseDownMenu = GameTools.ClickChangeButton(ChooseDownMenu, button);
+            ChooseShow = GameTools.ClickChangeShow(ChooseShow, OwnShow);
+            return;
+        }
+
+    }
+    //点击店铺进入店铺
+    public void ClickStore(GameObject button) {
+        GameTools.OpenUI(StoreShow);
+        UIMove.Instance.MoveUI(StoreShow.transform);
+    }
+    //点击上部分类
+    public void ClickTopMenu(GameObject button) {
+        StartCoroutine(AddChild(GuangJieGrid));
+    }
+    //添加子物体
+    private IEnumerator AddChild(GameObject grid) {
+        int index = grid.transform.childCount;
+        for (int i = 0; i < index; i++) {
+            grid.transform.GetChild(i).gameObject.SetActive(false);
+        }
+        //GridLayoutGroup uigrid = grid.GetComponent<GridLayoutGroup>();
+        //float 
+        for (int i = 0; i < index; i++)
+        {
+            yield return new WaitForSeconds(0.1f);
+            grid.transform.GetChild(i).gameObject.SetActive(true);
+        }
+    }
+}

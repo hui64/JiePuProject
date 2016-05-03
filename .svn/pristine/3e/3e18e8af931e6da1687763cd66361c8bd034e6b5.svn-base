@@ -1,0 +1,592 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using System;
+
+public class DituUI
+{
+    private static DituUI s_Instance;
+    public static DituUI Instance
+    {
+        get
+        {
+            if (null == s_Instance)
+            {
+                s_Instance = new DituUI();
+            }
+            return s_Instance;
+        }
+    }
+
+    UIProperty m_Root;
+    UIProperty m_Window;
+    UIProperty m_DituWin;
+    UIProperty m_DituRoot;
+
+    Vector2 center = new Vector2(1623, 364);
+    int z = 10;
+    int size = 256;
+
+    List<Vector2> point = new List<Vector2>();
+    List<Vector2> point6 = new List<Vector2>();
+    List<string> head = new List<string>();
+
+    //GPS
+    private LocationInfo lastLocationInfo;
+    private float posScale = 1;
+    private Vector2 globalPos;
+    private bool gpsRunning = false;
+    //精度决定了资源的消耗，精度要求越高资源消耗越大//
+    public float gpsAccuracy = 3000;
+    public float gpsUpdateDistance = 50;
+    public string gps_info = "";
+    public int flash_num = 1;
+    public void StartGPS()
+    {
+        //非手持设备则终止//
+        //if (Application.isEditor)
+        {
+            point.Add(new Vector2(118.06f,24.27f));
+            head.Add("head.h_shandianbing");
+            _DrawWindow();
+            return;
+        }
+        if (!gpsRunning)
+        {
+            m_Root.StartCoroutine(ActivateGPS());
+        }
+    }
+
+    IEnumerator ActivateGPS()
+    {
+        // Input.location 用于访问设备的位置属性（手持设备）, 静态的LocationService位置  
+        // LocationService.isEnabledByUser 用户设置里的定位服务是否启用  
+        if (!Input.location.isEnabledByUser)
+        {
+            this.gps_info = "isEnabledByUser value is:" + Input.location.isEnabledByUser.ToString() + " Please turn on the GPS";
+            yield break;
+        }
+
+        // LocationService.Start() 启动位置服务的更新,最后一个位置坐标会被使用  
+        Input.location.Start(10.0f, 10.0f);
+
+        point.Add(new Vector2(Input.location.lastData.longitude, Input.location.lastData.latitude));
+        head.Add("head.h_shandianbing");
+        _DrawWindow();
+
+        
+    }
+
+    public void StopGPS()
+    {
+        Input.location.Stop();
+        gpsRunning = false;
+    }
+
+    public void Show()
+    {
+        FingerGestures.OnFingerDragMove += OnDragMove;
+        FingerGestures.OnPinchMove += OnPinchMove;
+        //开始拖动事件
+        FingerGestures.OnFingerDragBegin += OnFingerDragBegin;
+        //拖动结束事件
+        FingerGestures.OnFingerDragEnd += OnFingerDragEnd;
+        //主界面下拉收起
+        //HomyButtonProperty btn = GameObject.Find(GuideNames.MainUIPopupButtonName).GetComponent<HomyButtonProperty>();
+        //if (btn.AddedValue == 1)
+        //{
+        //    btn.Click();
+        //}
+        GameObject go = GameTools.Map;
+        m_Root = go.GetComponent<UIProperty>();
+        //GameObject mapImage = GameTools.Map;
+        StartGPS();
+        //_DrawWindow();
+    }
+
+    /*********************    绘制界面     *********************/
+
+    /// <summary>
+    /// 绘制面板
+    /// </summary>
+    void _DrawWindow()
+    {
+        UIProperty txt = m_Root.AddChild("text");
+        txt.rectTransform.sizeDelta = new Vector2(1000, 80);
+        txt.rectTransform.localPosition = new Vector3(-110,600,0);
+        txt.label.fontSize = 60;
+        Debug.Log("point[0]=" + point[0]);
+        txt.text = point[0].ToString();
+       //point.Add(new Vector2(117.217491f, 39.145094f));
+       //head.Add("head.h_guojingfangweibing");
+       //point.Add(new Vector2(104.072272f, 30.663586f));
+       //head.Add("head.h_jiesensitansen");
+       //point.Add(new Vector2(121.509101f, 31.243421f));
+       //head.Add("head.h_leidianzhongjiezhe");
+       //point.Add(new Vector2(119.278788f, 26.065128f));
+       //head.Add("head.h_meiguoduichang");
+       //point.Add(new Vector2(118.155906f, 24.443327f));
+       //head.Add("head.h_youna");
+
+        //m_Root = HomyPanelBase.CreatePanel("SignUI", new HomyPanelParams((param) =>
+        //{
+        //    param.depth = NGUIDepth.WindowDepth1 + NGUIDepth.NextDepth;
+        //    param.side = UIAnchor.Side.Center;
+        //}));
+
+        //UIService.DrawBackButton(m_Root, Close, null, GuideNames.Guide_Return_Back_Button);
+
+        //UIProperty bg = m_Root.DrawButton(HomyUIBase.FullRect, string.Empty, new HomyButtonParams((p) =>
+        //{
+        //    p.sprite[0] = "com.bg_map";
+        //    p.buttonScale = false;
+        //}), "Background");
+        UIProperty bg = m_Root.AddChild("image");
+        //HomyUIBase.AddUIStretch(bg.gameObject);
+        //UIProperty mask = m_Root.DrawIcon(HomyUIBase.FullRect, "com.mask_map", "Mask");
+        UIProperty mask = m_Root.AddChild("image");
+        mask.Depth += 20;
+       // HomyUIBase.AddUIStretch(mask.gameObject);
+
+        m_Root.StartCoroutine(_RequestCoords6(point, (www) =>
+        {
+            point6 = _OnReceiveCoords6(www);
+
+            // m_DituRoot = m_Root.DrawEmpty(HomyUIBase.FullRect);
+            m_DituRoot = m_Root.AddChild("image");
+            //m_DituWin = m_DituRoot.DrawEmpty(HomyUIBase.EmptyRect, "DituWin"+z);
+            m_DituWin = m_DituRoot.AddChild("image");
+            m_DituWin.ID = "DituWin" + z;
+            m_DituWin.Depth++;
+            
+            int i = 0;
+            foreach (Vector2 po in point6)
+            {
+                Vector2 v = new Vector2(po.x / Mathf.Pow(2, (18 - z)), -po.y / Mathf.Pow(2, (18 - z)));
+                //UIProperty icon = m_DituWin.DrawIcon(new Rect(0, 0, 45, 45), head[i], "Head_" + v.ToString());
+                UIProperty icon = m_DituWin.AddChild("image");
+                //icon.DrawIcon(new Rect(-12, -10.5f, 65, 69), "com.nearby_player");
+                icon.AddChild("image");
+                icon.Depth += (4 + i * 5);
+                icon.transform.localPosition = new Vector3(v.x - 130, -v.y - 130, 0);
+                if (i == 0)
+                {
+                    center = new Vector2(icon.transform.localPosition.x / size, icon.transform.localPosition.y / size);
+                }
+                i++;
+            }
+            m_DituWin.transform.localPosition = new Vector3(-center.x * size, -center.y * size, 0);
+            UpdateMap();
+        }));
+
+    }
+
+    private void DrawDitu(Vector2 v2)
+    {
+        UIProperty icon = m_DituWin.FindChild(v2.ToString());
+        if (m_DituWin.FindChild(v2.ToString()) == null)
+        {
+            //icon = m_DituWin.DrawIcon_UITexture(new Rect(0, 0, size, size), "dituge", v2.ToString());
+            Debug.Log("DrawDitu v2="+ v2);
+            icon = m_DituWin.AddChild("image");
+            m_DituWin.name = "m_DituWin";
+            icon.ID = v2.ToString();
+            icon.transform.localPosition = (v2) * size;
+            icon.rectTransform.sizeDelta = new Vector2(size, size);
+        }
+        //if (icon.UITextureBackground.mainTexture.name.Equals("dituge"))
+        {
+            m_Root.StartCoroutine(LoadImg(v2, (www) =>
+            {
+                //icon.UITextureBackground.mainTexture = www.texture;
+                Texture2D t2 = www.texture;
+                if(icon!= null && icon.gameObject != null)
+                icon.sprite.sprite = Sprite.Create(t2, new Rect(0, 0, t2.width, t2.height), new Vector2(1, 1));
+            }));
+        }
+    }
+
+    float time = 0f;
+    Vector2 startpos = Vector2.zero;
+    void OnFingerDragBegin(int fingerIndex, Vector2 fingerPos, Vector2 startPos)
+    {
+        time = Time.time;
+        startpos = startPos;
+    }
+    void OnFingerDragEnd(int fingerIndex, Vector2 fingerPos)
+    {
+        float disTime = Time.time - time;
+        if (disTime < 0.2f)
+        {
+            Vector2 dis =(fingerPos - startpos) / disTime;
+            TweenPosition tp = m_DituWin.gameObject.AddComponent<TweenPosition>();
+            tp.from=m_DituWin.transform.localPosition;
+
+            float x = 400;
+            float y = 240;
+            if (dis.x < 0)
+            {
+                x = -x;
+            }
+            if (dis.y < 0)
+            {
+                y = -y;
+            }
+
+            tp.to = m_DituWin.transform.localPosition + new Vector3(x,y, 0);
+            tp.duration = 0.5f;
+            EventDelegate.Add(tp.onFinished, () =>
+            {
+                GameObject.Destroy(tp);
+            });
+            m_DituWin.transform.localPosition += new Vector3(x, y, 0);
+            //iTween.MoveTo(m_DituWin.gameObject, m_DituWin.transform.position, 2f);
+            UpdateMap();
+        }
+    }
+
+    void UpdateMap()
+    {
+        float offerX = m_DituWin.transform.localPosition.x / -size;
+        float offerY = m_DituWin.transform.localPosition.y / -size;
+        center = new Vector2(offerX, offerY);
+        List<string> list = new List<string>();
+        for (int i = -3; i < 5; i++)
+        {
+            for (int j = -2; j < 4; j++)
+            {
+                Vector2 v2 = new Vector2((int)center.x + i, (int)center.y + j);
+                list.Add(v2.ToString());
+                if (i < -1 || i > 2 || j < -1 || j > 2)
+                {
+                    UIProperty icon = m_DituWin.FindChild(v2.ToString());
+                    if (m_DituWin.FindChild(v2.ToString()) == null)
+                    {
+                        //icon = m_DituWin.DrawIcon_UITexture(new Rect(0, 0, size, size), "dituge", v2.ToString());
+                        icon = m_DituWin.AddChild("image");
+                        icon.transform.localPosition = (v2) * size;
+                    }
+                }
+                else
+                {
+                    DrawDitu(v2);
+                }
+            }
+        }
+        List<UIProperty> del = new List<UIProperty>();
+        foreach (UIProperty ui in m_DituWin.Children)
+        {
+            if (!list.Contains(ui.ID) && !ui.ID.StartsWith("Head"))
+            {
+                del.Add(ui);
+            }
+        }
+        foreach (UIProperty ui in del)
+        {
+            m_DituWin.Children.Remove(ui);
+            GameObject.DestroyImmediate(ui.gameObject);
+        }
+    }
+
+    void OnDragMove(int fingerIndex, Vector2 fingerPos, Vector2 delta)
+    {
+        foreach (WWW www in wwwList)
+        {
+            www.Dispose();
+        }
+        wwwList.Clear();
+        Vector3 old = m_DituWin.transform.localPosition;
+        m_DituWin.transform.localPosition = new Vector3(old.x + delta.x, old.y + delta.y, old.z);
+        UpdateMap();
+
+    }
+
+    void OnPinchMove2(Vector2 fingerPos1, Vector2 fingerPos2, float delta)
+    {
+        if (delta > 0)
+        {
+            if (m_DituRoot.transform.localScale.x < 1.5f)
+            {
+                m_DituRoot.transform.localScale += new Vector3(delta * 0.005f, delta * 0.005f, delta * 0.005f);
+                if (m_DituRoot.transform.localScale.x > 1.5f)
+                {
+                    m_DituRoot.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+                }
+                return;
+            }
+            else if (z >= 19)
+            {
+                return;
+            }
+            m_DituRoot.FindChild("DituWin" + z).gameObject.SetActive(false);
+            z++;
+            center = new Vector2(center.x * 2, center.y * 2);
+            m_DituRoot.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+        }
+        if (delta < 0)
+        {
+            if (m_DituRoot.transform.localScale.x > 0.75f)
+            {
+                m_DituRoot.transform.localScale += new Vector3(delta * 0.005f, delta * 0.005f, delta * 0.005f);
+                if (m_DituRoot.transform.localScale.x < 0.75f)
+                {
+                    m_DituRoot.transform.localScale = new Vector3(0.75f, 0.75f, 0.75f);
+                }
+                return;
+            }
+            else if (z <= 5)
+            {
+                return;
+            }
+            center = new Vector2(center.x / 2, center.y / 2);
+            m_DituRoot.FindChild("DituWin" + z).gameObject.SetActive(false);
+            z--;
+            if (z == 5)
+            {
+                center = new Vector2(5, 2);
+            }
+            m_DituRoot.transform.localScale = new Vector3(1.5f, 1.5f, 1.5f);
+        }
+
+        //m_DituRoot.Clean();
+        m_DituWin = m_DituRoot.FindChild("DituWin" + z);
+        if (m_DituWin == null)
+        {
+            //m_DituWin = m_DituRoot.DrawEmpty(HomyUIBase.EmptyRect, "DituWin" + z);
+            m_DituWin = m_DituRoot.AddChild("image");
+            int i = 0;
+            foreach (Vector2 po in point6)
+            {
+                Vector2 v = new Vector2(po.x / Mathf.Pow(2, (18 - z)), -po.y / Mathf.Pow(2, (18 - z)));
+                //UIProperty icon = m_DituWin.DrawIcon(new Rect(0, 0, 25, 25), head[i], "Head_" + v.ToString());
+                UIProperty icon = m_DituWin.AddChild("image");
+                icon.Depth += 4;
+                icon.transform.localPosition = new Vector3(v.x - 130, -v.y - 130, 0);
+                i++;
+            }
+            m_DituWin.Depth++;
+        }
+        else
+        {
+            m_DituWin.gameObject.SetActive(true);
+        }
+        if (delta > 0)
+        {
+            m_DituWin.transform.localPosition = new Vector3(-center.x * size - size / 2, -center.y * size - size/2, 0);
+        }
+        else
+        {
+            m_DituWin.transform.localPosition = new Vector3(-center.x * size + size / 4, -center.y * size + size/4, 0);
+        }
+       
+        Debug.Log(z + ":" + center.x.ToString() + "," + center.y.ToString());
+        UpdateMap();
+
+    }
+
+    bool b = true;
+    void OnPinchMove(Vector2 fingerPos1, Vector2 fingerPos2, float delta)
+    {
+        return;
+        if (!b)
+        {
+            return;
+        }
+        b = false;
+        if (delta > 0)
+        {
+            if (z >= 19)
+            {
+                b = true;
+                return;
+            }
+            TweenScale ts = m_DituRoot.gameObject.AddComponent<TweenScale>();
+            ts.from = m_DituRoot.transform.localScale;
+            ts.to = new Vector3(2f, 2f, 2f);
+            ts.duration = 0.5f;
+            EventDelegate.Add(ts.onFinished, () =>
+            {
+                b = true;
+                m_DituRoot.transform.localScale = new Vector3(1f, 1f, 1f);
+                if(m_DituRoot.FindChild("DituWin" + (z - 1)) != null)
+                    m_DituRoot.FindChild("DituWin" + (z - 1)).CloseImmediate();
+                if(m_DituRoot.FindChild("DituWin" + z) != null)
+                    m_DituRoot.FindChild("DituWin" + z).gameObject.SetActive(true);
+            });
+
+            z++;
+            if (z <= 5)
+            {
+                b = true;
+                return;
+            }
+            center = new Vector2(center.x * 2, center.y * 2);
+        }
+        if (delta < 0)
+        {
+            TweenScale ts = m_DituRoot.gameObject.AddComponent<TweenScale>();
+            ts.from = m_DituRoot.transform.localScale;
+            ts.to = new Vector3(0.5f, 0.5f, 0.5f);
+            ts.duration = 0.5f;
+            EventDelegate.Add(ts.onFinished, () =>
+            {
+                b = true;
+                m_DituRoot.transform.localScale = new Vector3(1f, 1f, 1f);
+                if (m_DituRoot.FindChild("DituWin" + (z + 1)) != null)
+                    m_DituRoot.FindChild("DituWin" + (z + 1)).CloseImmediate();
+                if (m_DituRoot.FindChild("DituWin" + z) != null)
+                    m_DituRoot.FindChild("DituWin" + z).gameObject.SetActive(true);
+
+            });
+
+            z--;
+            center = new Vector2(center.x / 2, center.y / 2);
+            if (z == 5)
+            {
+                center = new Vector2(5, 2);
+            }
+        }
+        Debug.Log(z);
+        m_DituWin = m_DituRoot.FindChild("DituWin" + z);
+        if (m_DituWin == null)
+        {
+            //m_DituWin = m_DituRoot.DrawEmpty(HomyUIBase.EmptyRect, "DituWin" + z);
+            m_DituWin = m_DituRoot.AddChild("image");
+            int i = 0;
+            foreach (Vector2 po in point6)
+            {
+                Vector2 v = new Vector2(po.x / Mathf.Pow(2, (18 - z)), -po.y / Mathf.Pow(2, (18 - z)));
+                //UIProperty icon = m_DituWin.DrawIcon(new Rect(0, 0, 45, 45), head[i], "Head_" + v.ToString());
+                //icon.DrawIcon(new Rect(-12, -10.5f, 65, 69), "com.nearby_player");
+
+                UIProperty icon = m_DituWin.AddChild("image");
+                icon.AddChild("image");
+                icon.Depth += (4 + i*5);
+                icon.transform.localPosition = new Vector3(v.x - 130, -v.y - 130, 0);
+                i++;
+            }
+            m_DituWin.Depth++;
+        }
+        else
+        {
+            m_DituWin.gameObject.SetActive(true);
+        }
+        if (delta > 0)
+        {
+            m_DituWin.transform.localPosition = new Vector3(-center.x * size - size / 2, -center.y * size - size / 2, 0);
+        }
+        else
+        {
+            m_DituWin.transform.localPosition = new Vector3(-center.x * size + size / 4, -center.y * size + size / 4, 0);
+        }
+
+        Debug.Log(z + ":" + center.x.ToString() + "," + center.y.ToString());
+        UpdateMap();
+        m_DituWin.gameObject.SetActive(false);
+
+    }
+    List<WWW> wwwList = new List<WWW>();
+    private IEnumerator LoadImg(Vector2 v2 ,Action<WWW> callback)
+    {
+        string url = string.Format("http://online2.map.bdimg.com/tile/?qt=tile&x={0}&y={1}&z={2}&styles=pl&udt=20140928", (int)v2.x, (int)v2.y, z);
+        WWW www = new WWW(url);
+        wwwList.Add(www);
+        yield return www;
+        if (!wwwList.Contains(www))
+        {
+            yield return null;
+        }    
+        else if (!string.IsNullOrEmpty(www.error))
+        {
+            Debug.LogError(string.Format("{0}: {1}", www.error, url));
+            yield return null;
+        }
+        else
+        {
+            if (callback != null)
+            {
+                callback(www);
+            }
+            if (www.assetBundle != null)
+            {
+                www.assetBundle.Unload(false);
+            }
+        }
+    }
+
+    public IEnumerator _RequestCoords6(List<Vector2> from,Action<WWW> callback)
+    {
+        string coords = string.Empty;
+        for (int i = 0; i < from.Count; ++i)
+        {
+            Vector2 lonlat = from[i];
+            if (i > 0)
+            {
+                coords += ";";
+            }
+            coords += string.Format("{0},{1}", lonlat.x, lonlat.y);
+        }
+        string url = string.Format(@"http://api.map.baidu.com/geoconv/v1/?coords={0}&from=5&to=6&ak=EEde6682c409600b3902c3b65523a21a", coords);
+        WWW www = new WWW(url);
+        yield return www;
+
+        if (!string.IsNullOrEmpty(www.error))
+        {
+            Debug.LogError(string.Format("{0}: {1}", www.error, url));
+            yield return null;
+        }
+        else
+        {
+            if (callback != null)
+            {
+                callback(www);
+            }
+            if (www.assetBundle != null)
+            {
+                www.assetBundle.Unload(false);
+            }
+        }
+    }
+
+    private List<Vector2> _OnReceiveCoords6(object sender)
+    {
+        List<Vector2> results = new List<Vector2>();
+        WWW www = sender as WWW;
+        if (!string.IsNullOrEmpty(www.text))
+        {
+            JSONObject json = JSONObject.Create(www.text);
+            JSONObject jsonResult = json["result"];
+            for (int i = 0; i < jsonResult.Count; ++i)
+            {
+                JSONObject jsonCoords = jsonResult[i];
+                float x = jsonCoords["x"].f;
+                float y = jsonCoords["y"].f;
+                results.Add(new Vector2(x, y));
+            }
+        }
+        return results;
+    }
+
+    public void Close()
+    {
+       // UITool.addUICloseEffect(m_Root, () =>
+       // {
+            if (null != m_Root)
+            {
+                m_Root.Clean();
+            }
+            //GameGuide.NewGuide();
+
+            //Debug.Log("Start New Guide");
+        //});
+        s_Instance = null;
+        FingerGestures.OnFingerDragMove -= OnDragMove;
+        FingerGestures.OnPinchMove -= OnPinchMove;
+        //开始拖动事件
+        FingerGestures.OnFingerDragBegin -= OnFingerDragBegin;
+        //拖动结束事件
+        FingerGestures.OnFingerDragEnd -= OnFingerDragEnd;
+
+    }
+  
+}

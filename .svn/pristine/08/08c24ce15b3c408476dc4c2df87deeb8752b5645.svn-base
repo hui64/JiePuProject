@@ -1,0 +1,25 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class UIMove : MonoBehaviour {
+    public static UIMove Instance;
+    void Awake(){
+        Instance = this;
+    }
+    //移动界面
+   public void MoveUI(Transform tran)
+    {
+        StartCoroutine(UIMove.Instance.MoveToward(tran, Vector3.zero, 50f));
+    }
+    //移动到目标位置
+    public IEnumerator MoveToward(Transform myTransform, Vector3 targetPos, float speed) {
+        while(true){
+            myTransform.localPosition = Vector3.MoveTowards(myTransform.localPosition, targetPos, speed);
+            if (myTransform.localPosition == targetPos)
+            {
+                yield break;
+            }
+            yield return null;
+        }
+    } 
+}

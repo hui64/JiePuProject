@@ -1,0 +1,37 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class GameInit : MonoBehaviour {
+    public static GameInit Instance; 
+    private float Time = 5.0f;
+    private GameObject StartShow;
+    private GameObject MainShow;
+    void Awake() {
+        Instance = this;
+        GameTools.SetScreenModify();// 设置分辨率参数
+    }
+	void Start () {
+        Init();
+	}
+    private void Init() {
+        transform.FindChild("scale").localScale = new Vector3(GameTools.Scale, GameTools.Scale, GameTools.Scale);
+        GameTools.WarnText = transform.FindChild("scale/warn").GetComponent<Text>();
+        StartShow = transform.FindChild("scale/start").gameObject;
+        GameTools.InitNavigations(StartShow);
+        GameTools.Wait = transform.FindChild("scale/wait").gameObject;
+        GameTools.Map = transform.FindChild("Map").gameObject;
+        MainShow = transform.FindChild("scale/main").gameObject;
+    }
+    public void LoginMain() {
+        StartCoroutine(OpenMain());
+    }
+    public IEnumerator OpenMain() {
+        print("sdf");
+        GameTools.ClickMap(gameObject);
+        yield return new WaitForSeconds(Time);
+        GameTools.OpenUI(MainShow);
+        UIMove.Instance.MoveUI(MainShow.transform);
+        DituUI.Instance.Close();
+    }
+}

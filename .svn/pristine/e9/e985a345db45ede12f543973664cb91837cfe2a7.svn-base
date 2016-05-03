@@ -1,0 +1,100 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.Events;
+using UnityEngine.UI;
+
+public enum UIType
+{
+    Empty,
+    Panel,
+    Window,
+    Label,
+    Input,
+    Button,
+    RadioButton,
+    ScrollView,
+    Icon,
+    //ScrollView可视窗
+    Visual,
+    Table,
+    Mix,//图文混排
+}
+
+public enum UIEffect
+{ 
+    Null,
+    Animation,
+    Childmove,
+    ReadyStopMove,
+    StopChildmove,
+    Rotation,
+    ReadyStopRotation,
+    StopRotation,
+    ChildRotate,
+    ReadyStopRotate,
+    StopChildRotate,
+}
+public class UIBase {
+
+    public static Canvas canvas = null;
+    //新建画布
+    public static void Init()
+    {
+        GameObject source =LoadUISource("Canvas");
+        GameObject root = GameObject.Instantiate(source);
+        canvas = root.GetComponentInChildren<Canvas>();
+        GameObject.DontDestroyOnLoad(root);
+    }
+
+    //加载资源
+    public static GameObject LoadUISource(string str)
+    {
+        GameObject go = null;
+        //if (Cache.ResourceDic!= null && Cache.ResourceDic.ContainsKey(str))
+        //{
+        //    go = Cache.ResourceDic[str] as GameObject;
+        //}
+        if (go == null)
+        {
+            go = Resources.Load(str) as GameObject;
+        }
+        if (go == null)
+        {
+            Debug.Log("can't not find resource =" + str);
+        }
+        return go;
+    }
+
+    public static GameObject ShowUI(string str)
+    {
+        GameObject source = UIBase.LoadUISource(str);
+        if (source == null)
+        {
+            Debug.Log("无法加载资源：" + str);
+            return null;
+        }
+        GameObject form = GameObject.Instantiate(source);
+        form.name = source.name;
+        if (canvas == null)
+        {
+            GameObject canv= GameObject.Find("Canvas(Clone)");
+            if (canv == null)
+            {
+                Init();
+            }
+            else
+            {
+                canvas = canv.GetComponentInChildren<Canvas>();
+            }
+
+        }
+        form.transform.SetParent(UIBase.canvas.transform, false);
+        return form;
+    }
+
+    public void AddButtonEvent(GameObject go, UnityAction call)
+    {
+        Button btn = go.GetComponent<Button>();
+        btn.onClick.AddListener(call);    
+    }
+}

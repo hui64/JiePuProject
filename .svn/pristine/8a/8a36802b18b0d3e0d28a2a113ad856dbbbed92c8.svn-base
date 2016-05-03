@@ -1,0 +1,95 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class LoopScrollRect : ScrollRect {
+    private GameObject Grid;
+    private float DistanceY = 0;
+    private float TopY = 0;
+    private float BottomY = 0;
+    private Transform[] ChildTrans;
+    private int First;
+    private int Last;
+    private int ChildNum;
+    private Vector2 FirstPos;
+    private Vector2 LastPos;
+    void Awake() {
+        
+    }
+    void Start() {
+        Init(); 
+    }
+    private void Init() {
+        Grid = content.gameObject;
+        RectTransform gridRec = Grid.GetComponent<RectTransform>();
+        SetDistance(gridRec);
+        GetChildTransforms(Grid);
+        onValueChanged.AddListener(OnValueChanged);
+    }
+    //设置上边界跟下边界 间距
+    private void SetDistance(RectTransform RTran) {
+        DistanceY = RTran.sizeDelta.y;
+        print(DistanceY);
+        if (RTran.pivot == new Vector2(0.5f, 0.5f))
+        {
+            TopY = 0.5f * DistanceY;
+            BottomY = -TopY;
+        }
+        if (RTran.pivot == new Vector2(0.5f, 1f))
+        {
+            BottomY = -DistanceY;
+        }
+    }
+    //获取子物体的Transform
+    private void GetChildTransforms(GameObject grid) {
+        ChildNum = Grid.transform.childCount;
+        ChildTrans = new Transform[ChildNum];
+        for (int i = 0; i < ChildNum; i++)
+        {
+            ChildTrans[i] = Grid.transform.GetChild(i);
+        }
+        First = 0;
+        Last = ChildNum - 1;
+        FirstPos = ChildTrans[0].position + new Vector3(0, 238f, 0);
+        LastPos = ChildTrans[ChildNum - 1].position;
+    }
+    private float ChangY = 0;
+    private float OldY = 1f;
+    //拖拽时调用
+    private void OnValueChanged(Vector2 move) {
+        //ChangY = move.y - OldY;
+        //print(ChildTrans[First].position.y);
+
+        
+        if (ChildTrans[First].position.y >= FirstPos.y)
+        {
+            //OldY = OldY + 0.1f;
+            //ChangY = 0;
+            ChangeLastToFirst();
+        }
+        if (ChildTrans[First].position.y <= FirstPos.y)
+        {
+            //OldY = OldY - 0.1f;
+            //ChangY = 0;
+            ChangeFirstToLast();
+        }
+    }
+    //第一个移动到最后一个
+    public void ChangeFirstToLast() {
+        ChildTrans[First].position = LastPos;
+        Last = First;
+        if (First == ChildNum - 1)
+            First = 0;
+        else
+            First = First + 1;
+    }
+	//最后一个移动到第一个
+    public void ChangeLastToFirst() {
+        ChildTrans[Last].position = FirstPos;
+        First = Last;
+        if (Last == 0)
+            First = ChildNum - 1;
+        else
+            Last = Last - 1;
+    }
+}

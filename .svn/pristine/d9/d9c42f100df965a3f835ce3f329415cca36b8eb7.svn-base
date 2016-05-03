@@ -1,0 +1,28 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class MenuGroup : MonoBehaviour {
+    private GridLayoutGroup MyLayout;
+    public int speed = 1;
+	// Use this for initialization
+	void Start () {
+        MyLayout = transform.GetComponent<GridLayoutGroup>();
+	}
+    void OnEnable() {
+        StartCoroutine("GetDown");
+    }
+    //下拉
+    private IEnumerator GetDown() {
+        int y = -48;
+        while (true) {
+            y += speed;
+            //MyLayout.spacing = new Vector2(0, y);
+            if (MyLayout.spacing.y >= 0)
+                yield break;
+            yield return null;
+        }
+    }
+	
+	
+}

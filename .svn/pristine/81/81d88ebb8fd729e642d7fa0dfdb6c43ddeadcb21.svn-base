@@ -1,0 +1,64 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class GameInit : MonoBehaviour {
+    public static GameInit Instance; 
+    private float MaxTime = 5.0f;
+    private GameObject StartShow;
+    private GameObject MainShow;
+    private GameObject Scale;
+    void Awake() {
+        Instance = this;
+        GameTools.SetScreenModify();// 设置分辨率参数
+    }
+	void Start () {
+        Init();
+	}
+    private void Init() {
+        Scale = transform.FindChild("scale").gameObject;
+        Scale.transform.localScale = new Vector3(GameTools.Scale, GameTools.Scale, GameTools.Scale);
+        GameTools.WarnText = transform.FindChild("scale/warn").GetComponent<Text>();
+        StartShow = transform.FindChild("scale/start").gameObject;
+        GameTools.InitNavigations(StartShow);
+        GameTools.Wait = transform.FindChild("scale/wait").gameObject;
+        GameTools.Map = transform.FindChild("Map/map").gameObject;
+        MainShow = transform.FindChild("scale/main").gameObject;
+        EventTriggerListener.Get(transform.FindChild("Map/top/mapbutton").gameObject).onClick
+        = CloseMap;
+    }
+    public void OpenMap(GameObject button) {
+        OpenMap();
+    }
+    public void OpenMap() {
+        GameTools.Map.transform.parent.gameObject.SetActive(true);
+        DituUI.Instance.Show();
+        StartShow.SetActive(false);
+        StartCoroutine("CountDownOpenMain");
+    }
+    //倒计时 有事件输入的时候从新倒计时
+    public IEnumerator CountDownOpenMain() {
+        float time = 0;
+        while (time < MaxTime) {
+            time += Time.deltaTime;
+            if (Input.anyKey)
+            {
+                time = 0;
+            }
+            yield return null;
+        }
+        CloseMap(gameObject);
+    }
+    //关闭地图
+    public void CloseMap(GameObject button) {
+        GameTools.Map.transform.parent.gameObject.SetActive(false);
+        StopCoroutine("CountDownOpenMain");
+        DituUI.Instance.Close();
+        OpenMain();
+    }
+    //登录到主界面
+    public void OpenMain() {
+        GameTools.OpenUI(MainShow);
+        UIMove.Instance.MoveUI(MainShow.transform);
+    }
+}

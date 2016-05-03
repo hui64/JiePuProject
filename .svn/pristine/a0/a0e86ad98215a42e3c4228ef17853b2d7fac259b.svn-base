@@ -1,0 +1,1052 @@
+﻿using UnityEngine;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine.Events;
+using UnityEngine.UI;
+using System;
+using UnityEngine.EventSystems;
+//using UnityEditor;
+public class UIProperty : MonoBehaviour {
+
+    Dictionary<string, Sprite> ImageSource = new Dictionary<string, Sprite>();
+    private RectTransform _rectTransform;
+    public RectTransform rectTransform
+    { 
+        get
+        {
+            if (_rectTransform == null)
+            {
+                _rectTransform = GetComponent<RectTransform>();
+            }
+            return _rectTransform;
+        }
+
+    }
+    //所在画布
+    public Canvas canvas;
+    //控件ID
+    public string ID;
+    //类型
+    public UIType Type;
+    //父级控件
+    public UIProperty Parent;
+    //子级控件集
+    public List<UIProperty> Children = new List<UIProperty>();
+
+    //关闭事件
+    public event UnityAction ClosedEvent;
+
+    bool Destroyed = false;
+
+    public Text label;
+    public string text
+    {
+        set
+        {
+            label.text = value;
+        }
+        get
+        {
+            return label.text;
+        }
+    }
+    private Image _sprite;
+    public Image sprite
+    {
+        get
+        {
+            if (_sprite == null)
+            {
+                _sprite = GetComponent<Image>();
+            }
+            return _sprite;
+        }
+        set
+        {
+            _sprite = value;
+        }
+    }
+    public string image
+    {
+        set
+        {
+
+            Sprite sp;
+			if(ImageSource.ContainsKey(value))
+			{
+                sp = ImageSource[value];
+
+			}
+			else
+			{
+				 Texture2D t2 = Resources.Load(value) as Texture2D;
+                 if (t2 == null)
+                 {
+                     return;
+                 }
+                 sp = Sprite.Create(t2, new Rect(0, 0, t2.width, t2.height), new Vector2(1, 1));
+                 ImageSource.Add(value, sp);
+			}
+            sprite.sprite = sp;
+        }
+        get
+        {
+            return sprite.sprite.name;
+        }
+    }
+
+    public string ResultImage = "";
+    public List<float> ResultAngles = new List<float>();
+    private float _value = 0;
+    public float value
+    {
+        set 
+        {
+            Image img = GetComponent<Image>();
+            img.fillAmount = value;
+        }
+        get 
+        {
+            return _value;
+        }
+    }
+
+    private int _depth = 0;
+    public  int Depth
+    {
+        set {
+            transform.SetSiblingIndex(value);
+            _depth = value;
+        }
+        get { return _depth; }
+    }
+
+    private Pivot _pivot;
+    public Pivot pivot
+    {
+         set
+        {
+            _pivot = value;
+            SetAnchor(value);
+        }
+        get
+        {
+            return _pivot;
+        }
+    }
+
+    public Vector2 _point = Vector2.zero;//屏幕坐标
+	public Vector2 point
+	{
+		set
+		{
+			_point = value;
+			transform.localPosition = new Vector3(_point.x,_point.y,0);
+
+		}
+		get
+		{
+			return _point;
+		}
+
+	}
+
+    public int index = 0;
+
+    public UIEffect EffectType = UIEffect.Null;
+    public List<Texture> AnimationList = new List<Texture>();
+    public float speed = 1;
+	public bool loop = false;
+	public int animationindex =1;
+
+    private bool _enable = true;
+
+    public int scrollCount =4;
+
+    private float clockTime = 0;
+    private int SXNumber = 0;
+    private int SXNumber1 = 0;
+    public int selectSXNum = 0;
+    GameObject kaijiangbiankuang, tuowei1, tuowei2, tuowei3;
+    private bool isSXNumber = true;
+    float jgTime = 0.1f;
+    int musicjg = 0;
+    float isKJ = -1;
+    
+
+    public GridLayoutGroup ScrollGrid=null;//滚动条列表
+    //private List<string> AnimationList = new List<string>();
+	// Use this for initialization
+	void Start () {
+        if (this.GetComponent<ScrollRect>() != null)
+        {
+            GridLayoutGroup glg = GetComponentInChildren<GridLayoutGroup>();
+            RectTransform rt = glg.GetComponent<RectTransform>();
+            rt.localPosition = new Vector3(rt.localPosition.x, 0, rt.localPosition.z);
+            rt.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
+        }
+
+        Button btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.AddListener(() =>
+            {
+                AcitveRadioButton();
+                //AudioManager.playSound("click");
+            }); 
+        }
+	}
+
+    int temp = 0;
+	// Update is called once per frame
+    void Update()
+    {
+        if (EffectType == UIEffect.Animation)
+        {
+            if (temp >= speed)
+            {
+                if (AnimationList.Count > 0 && animationindex <= AnimationList.Count)
+                {
+                    //string na = AnimationList[animationindex - 1];
+                    //image = na;
+                    RawImage im = this.gameObject.GetComponent<RawImage>();
+                    im.texture = AnimationList[animationindex - 1];
+                    animationindex++;
+                }
+                else
+                {
+                    if (loop)
+                    {
+                        animationindex = 1;
+                    }
+                    else
+                    {
+                        animationindex = 1;
+                        EffectType = UIEffect.Null;
+                    }
+                }
+                temp = 0;
+            }
+            else
+            {
+                temp++;
+            }
+
+        }
+        else if (EffectType == UIEffect.Childmove || EffectType == UIEffect.ReadyStopMove)
+        {
+            if (Children[0].rectTransform.localPosition.y > -Children[0].rectTransform.sizeDelta.y)
+            {
+                Children[0].rectTransform.localPosition -= new Vector3(0, Children[0].rectTransform.sizeDelta.y * Time.deltaTime * speed, 0);
+            }
+            else
+            {
+                Children[0].rectTransform.localPosition = new Vector3(0, Children[0].rectTransform.sizeDelta.y, 0);
+                //if (string.IsNullOrEmpty(ResultImage))
+                {
+                    Children[0].image = "Textures/水果/大/" + (UnityEngine.Random.Range(1, 11)).ToString();
+                }
+                //else
+                //{
+                //    Children[0].image = "Textures/水果/大/" + ResultImage;
+                //    ResultImage = string.Empty;
+                //}
+
+
+            }
+
+            if (Children[1].rectTransform.localPosition.y > -Children[1].rectTransform.sizeDelta.y)
+            {
+                Children[1].rectTransform.localPosition -= new Vector3(0, Children[1].rectTransform.sizeDelta.y * Time.deltaTime * speed, 0);
+            }
+            else
+            {
+                Children[1].rectTransform.localPosition = new Vector3(0, Children[1].rectTransform.sizeDelta.y, 0);
+                if (string.IsNullOrEmpty(ResultImage))
+                {
+                    Children[1].image = "Textures/水果/大/" + (UnityEngine.Random.Range(1, 11)).ToString();
+                }
+                else
+                {
+                    Children[1].image = "Textures/水果/大/" + ResultImage;
+                    ResultImage = string.Empty;
+                }
+                if (EffectType == UIEffect.ReadyStopMove)
+                {
+                    EffectType = UIEffect.StopChildmove;
+                }
+            }
+            if (Children[0].rectTransform.localPosition.y - Children[1].rectTransform.localPosition.y < 0)
+            {
+                Children[1].rectTransform.localPosition = new Vector3(0, Children[0].rectTransform.localPosition.y + 280, 0);
+            }
+            else if (Children[1].rectTransform.localPosition.y - Children[0].rectTransform.localPosition.y < 0)
+            {
+                Children[0].rectTransform.localPosition = new Vector3(0, Children[1].rectTransform.localPosition.y + 280, 0);
+            }
+            else if (Children[1].rectTransform.localPosition.y - Children[0].rectTransform.localPosition.y == 0)
+            {
+                if (Children[0].rectTransform.localPosition.y <= 0)
+                {
+                    Children[0].rectTransform.localPosition = new Vector3(0, Children[1].rectTransform.localPosition.y + 280, 0);
+                }
+                else
+                {
+                    Children[0].rectTransform.localPosition = new Vector3(0, Children[1].rectTransform.localPosition.y - 280, 0);
+                }
+            }
+
+        }
+        //最后一次滚动，确认上面一个的位置，并移动下面的
+        else if (EffectType == UIEffect.StopChildmove)
+        {
+            if (Children[0].rectTransform.localPosition.y - Children[1].rectTransform.localPosition.y < 0)
+            {
+                if (Children[1].rectTransform.localPosition.y > 0)
+                {
+                    Children[1].rectTransform.localPosition -= new Vector3(0, Children[1].rectTransform.sizeDelta.y * Time.deltaTime * speed, 0);
+                }
+                else
+                {
+                    Children[1].rectTransform.localPosition = new Vector3(0, 0, 0);
+                }
+                Children[0].rectTransform.localPosition = new Vector3(0, Children[1].rectTransform.localPosition.y - 280, 0);
+            }
+            if (Children[1].rectTransform.localPosition.y - Children[0].rectTransform.localPosition.y < 0)
+            {
+                if (Children[0].rectTransform.localPosition.y > 0)
+                {
+                    Children[0].rectTransform.localPosition -= new Vector3(0, Children[0].rectTransform.sizeDelta.y * Time.deltaTime * speed, 0);
+                }
+                else
+                {
+                    Children[0].rectTransform.localPosition = new Vector3(0, 0, 0);
+                }
+                Children[1].rectTransform.localPosition = new Vector3(0, Children[0].rectTransform.localPosition.y - 280, 0);
+            }
+        }
+        else if (EffectType == UIEffect.Rotation)
+        {
+            transform.Rotate(new Vector3(0, 0, 1), speed);
+        }
+        else if (EffectType == UIEffect.StopRotation)
+        {
+            foreach (float ra in ResultAngles)
+            {
+
+                if (Mathf.Abs(transform.localRotation.eulerAngles.z - ra) <= Mathf.Abs(speed))
+                {
+
+                    transform.localRotation = Quaternion.Euler(0, 0, ra);
+                    EffectType = UIEffect.Null;
+                    break;
+                }
+            }
+            if (EffectType == UIEffect.Null)
+            {
+                ResultAngles.Clear();
+            }
+            else
+            {
+                transform.Rotate(new Vector3(0, 0, 1), speed);
+            }
+        }
+        else if (EffectType == UIEffect.ChildRotate || EffectType == UIEffect.ReadyStopRotate)
+        {           
+            clockTime += Time.deltaTime * speed;
+            if (clockTime > 1)
+            {
+                if (speed >= 16)
+                {
+                    musicjg++;
+                    if (musicjg == 1)
+                    {
+                        //AudioManager.playSound("循环音效", Cache.soundVolume);
+                    }
+                    else if (musicjg == 2)
+                    {
+                        musicjg = 0;
+                    }
+                }
+                else
+                {
+                    //AudioManager.playSound("循环音效", Cache.soundVolume);
+                }
+                int i, j, k;
+                clockTime = 0;
+                SXNumber++;
+                i = SXNumber - 1;
+                j = SXNumber - 2;
+                k = SXNumber - 3;
+                if (k == -3)
+                {
+                    i = 25;
+                    j = 24;
+                    k = 23;
+                }
+                else if (k == -2)
+                {
+                    j = 25;
+                    k = 24;
+                }
+                else if (k == -1)
+                {
+                    k = 25;
+                }
+                if (SXNumber > 25)
+                {
+                    SXNumber = 0;
+                }
+                kaijiangbiankuang.transform.SetParent(Children[SXNumber].transform);
+                kaijiangbiankuang.transform.localPosition = new Vector3(0, 0, -600);
+                if (speed >= 16)
+                {
+                    tuowei1.gameObject.SetActive(true);
+                    tuowei1.transform.SetParent(Children[i].transform);
+                    tuowei1.transform.localPosition = new Vector3(0, 0, -600);
+                }
+                else
+                {
+                    tuowei1.gameObject.SetActive(false);
+                }
+                if (speed >= 20)
+                {
+                    tuowei2.gameObject.SetActive(true);
+                    tuowei2.transform.SetParent(Children[j].transform);
+                    tuowei2.transform.localPosition = new Vector3(0, 0, -600);
+                }
+                else
+                {
+                    tuowei2.gameObject.SetActive(false);
+                }
+                if (speed == 24)
+                {
+                    tuowei3.gameObject.SetActive(true);
+                    tuowei3.transform.SetParent(Children[k].transform);
+                    tuowei3.transform.localPosition = new Vector3(0, 0, -600);
+                }
+                else
+                {
+                    tuowei3.gameObject.SetActive(false);
+                }
+                if (EffectType == UIEffect.ReadyStopRotate && ((SXNumber + 1) == selectSXNum || (SXNumber - 12) == selectSXNum))
+                {
+                    EffectType = UIEffect.StopChildRotate;
+                }
+                //if (isKJ == 0 && ((SXNumber + 1) == selectSXNum || (SXNumber - 12) == selectSXNum))
+                //{                   
+                //    NextSXNumber();
+                //}
+                //else if (isKJ == 1 && EffectType == UIEffect.ReadyStopRotate)
+                ////&& ((SXNumber + 1) == selectSXNum || ((SXNumber + 1) - 13) == selectSXNum))
+                //{
+                //    NextSXNumber();
+                //}
+            }
+        }
+        //else if (EffectType == UIEffect.StopChildRotate)
+        //{
+        //    clockTime += Time.deltaTime;
+        //    if (clockTime >= jgTime)
+        //    {
+        //        AudioManager.playSound("循环音效3", Cache.soundVolume);
+        //        clockTime = 0;
+        //        jgTime += 0.1f;
+        //        if (isSXNumber)
+        //        {
+        //            isSXNumber = false;
+        //            kaijiangbiankuang.transform.SetParent(Children[SXNumber1].transform);
+        //            kaijiangbiankuang.transform.localPosition = new Vector3(0, 0, -600);
+        //        }
+        //        else
+        //        {
+        //            isSXNumber = true;
+        //            kaijiangbiankuang.transform.SetParent(Children[SXNumber].transform);
+        //            kaijiangbiankuang.transform.localPosition = new Vector3(0, 0, -600);
+        //        }
+        //    }
+
+            //if (kaijiangbiankuang1 == null)
+            //{
+            //    GameObject go = null;
+            //    if (Cache.ResourceDic != null && Cache.ResourceDic.ContainsKey("kaijiangbiankuang02"))
+            //    {
+            //        go = Cache.ResourceDic["kaijiangbiankuang02"] as GameObject;
+            //    }
+            //    if (go == null)
+            //    {
+            //        go = Resources.Load("kaijiangbiankuang02") as GameObject;
+            //    }
+            //    kaijiangbiankuang1 = GameObject.Instantiate<GameObject>(go);
+            //    kaijiangbiankuang1.transform.parent = Children[SXNumber].transform;
+            //    kaijiangbiankuang1.transform.localPosition = new Vector3(0, 0, -600);
+            //}
+            //else 
+            //{
+            //    kaijiangbiankuang1.SetActive(true);
+            //}
+        //}
+    }
+
+    /*************查找控件******************/
+    /// <summary>
+    /// 查找指定KEYID子对象
+    /// </summary>
+    /// <param name="keyID"></param>
+    /// <returns></returns>
+    public UIProperty FindChild(string keyID)
+    {
+        if (!string.IsNullOrEmpty(keyID))
+        {
+            foreach (UIProperty child in Children)
+            {
+				if(child == null || child.gameObject == null)
+				{
+					//Selection.activeTransform = this.gameObject.transform;
+					//return null;
+					continue;
+				}
+                //包含查询
+                if (keyID.StartsWith("*") && keyID.EndsWith("*"))
+                {
+                    if (child.ID.Contains(keyID.Replace("*", "")))
+                    {
+                        return child;
+                    }
+                }
+                //后缀查询
+                else if (keyID.StartsWith("*"))
+                {
+                    if (child.ID.EndsWith(keyID.Replace("*", "")))
+                    {
+                        return child;
+                    }
+                }
+                //前缀查询
+                else if (keyID.EndsWith("*"))
+                {
+                    if (child.ID.StartsWith(keyID.Replace("*", "")))
+                    {
+                        return child;
+                    }
+                }
+                //全匹配查询
+                else
+                {
+                    if (child.ID == keyID)
+                    {
+                        return child;
+                    }
+                }
+            }
+            UIProperty tmp;
+            foreach (UIProperty child in Children)
+            {
+                if (child == null || child.gameObject == null)
+                {
+                    continue;
+                }
+                tmp = child.FindChild(keyID);
+                if (tmp != null)
+                {
+                    return tmp;
+                }
+            }
+
+        }
+        return null;
+    }
+
+    public void ShowUIEffect(UIEffect ue,float param = 0,string path = "")
+    {
+        EffectType = ue;
+        if (ue == UIEffect.Animation)
+        {
+			animationindex = 1;
+            if (param > 1)
+            {
+                for (int i = 1; i <= param; i++)
+                {
+                    //AnimationList.Add(path + ID + i);
+                }
+            }
+        }
+
+        else if (ue == UIEffect.Childmove)
+        {
+            speed = param;
+            Children[0].rectTransform.localPosition = Vector3.zero;
+            Children[1].rectTransform.localPosition = new Vector3(0, -Children[1].rectTransform.sizeDelta.y, 0);
+        }
+        else if (ue == UIEffect.Rotation)
+        {
+            speed = param;
+        }
+        else if (ue == UIEffect.Null)
+        {
+            AnimationList.Clear();
+        }
+        else if (ue == UIEffect.ChildRotate)
+        {
+            //AudioManager.playSound("循环音效", Cache.soundVolume);
+            if (kaijiangbiankuang == null)
+            {
+                GameObject go = null;
+                //if (Cache.ResourceDic != null && Cache.ResourceDic.ContainsKey("kaijiangbiankuang1"))
+                //{
+                //    go = Cache.ResourceDic["kaijiangbiankuang1"] as GameObject;
+                //}
+                if (go == null)
+                {
+                    go = Resources.Load("kaijiangbiankuang1") as GameObject;
+                }
+                kaijiangbiankuang = GameObject.Instantiate<GameObject>(go);
+                kaijiangbiankuang.transform.parent = Children[SXNumber].transform;
+                kaijiangbiankuang.transform.localScale = new Vector3(116, 116, 0);
+                kaijiangbiankuang.transform.localPosition = new Vector3(0, 0, -600);
+
+                Material goMa = Resources.Load<Material>("Materials/kaijiangbiankuang1");
+                tuowei1 = GameObject.Instantiate<GameObject>(go);
+                tuowei1.transform.parent = Children[SXNumber].transform;
+                tuowei1.transform.localScale = new Vector3(116, 116, 0);
+                tuowei1.transform.localPosition = new Vector3(0, 0, 100);
+                tuowei1.GetComponentInChildren<Renderer>().material = goMa;
+                tuowei2 = GameObject.Instantiate<GameObject>(go);
+                tuowei2.transform.parent = Children[SXNumber].transform;
+                tuowei2.transform.localScale = new Vector3(116, 116, 0);
+                tuowei2.transform.localPosition = new Vector3(0, 0, 100);
+                goMa = Resources.Load<Material>("Materials/kaijiangbiankuang2");
+                tuowei2.GetComponentInChildren<Renderer>().material = goMa;
+                tuowei3 = GameObject.Instantiate<GameObject>(go);
+                tuowei3.transform.parent = Children[SXNumber].transform;
+                tuowei3.transform.localScale = new Vector3(116, 116, 0);
+                tuowei3.transform.localPosition = new Vector3(0, 0, 100);
+                goMa = Resources.Load<Material>("Materials/kaijiangbiankuang3");
+                tuowei3.GetComponentInChildren<Renderer>().material = goMa;
+            }
+            else
+            {
+                kaijiangbiankuang.transform.SetParent(Children[SXNumber].transform);
+                kaijiangbiankuang.transform.localPosition = new Vector3(0, 0, -600);
+                kaijiangbiankuang.SetActive(true);
+            }
+            speed = param;
+        }
+        else if (ue == UIEffect.ReadyStopRotate)
+        {
+            isKJ = param;
+        }
+        else if (ue == UIEffect.StopChildRotate)
+        {
+            //if (param == 0)
+            //{
+            //    AudioManager.playSound("循环音效3", Cache.soundVolume);
+            //    kaijiangbiankuang.transform.SetParent(Children[selectSXNum].transform);
+            //    kaijiangbiankuang.transform.localPosition = new Vector3(0, 0, -600);
+            //}
+            //else
+            {
+                kaijiangbiankuang.SetActive(false);
+                jgTime = 0.1f;
+                jgTime = 0.1f;
+                musicjg = 0;
+                isKJ = -1;
+            }
+            EffectType = UIEffect.Null;
+        }
+    }
+
+    public void AddButtonEvent( UnityAction call)
+    {
+
+        Button btn = GetComponent<Button>();
+        if (btn != null)
+        {
+            btn.onClick.AddListener(call);
+        }
+        else
+        {
+            Debug.Log("this isn't button");
+        }
+
+    }
+
+    public void AddSliderEvent(UnityAction<float> call)
+    {
+        Slider slider = GetComponent<Slider>();
+        if (slider != null)
+        {
+            slider.onValueChanged.AddListener(call);
+        }
+        else
+        {
+            Debug.Log("there is no slider");
+        }
+    }
+
+    public void AcitveRadioButton(bool active = true)
+    {
+        if (Type == UIType.RadioButton)
+        {
+            foreach (UIProperty up in Parent.Children)
+            {
+                if (up._enable == true && up.Type == UIType.RadioButton)
+                {
+                    up.GetComponent<Button>().interactable = true;
+                }
+                if (up.GetComponentInChildren<Text>() != null)
+                {
+                    Color c = up.GetComponentInChildren<Text>().color;
+                    up.GetComponentInChildren<Text>().color = new Color(c.r,c.g,c.b,1);
+                }
+            }
+
+            GetComponent<Button>().interactable = !active;
+            if(GetComponentInChildren<Text>() != null)
+            {
+
+                if (active)
+                {
+                    Color c = GetComponentInChildren<Text>().color;
+                    GetComponentInChildren<Text>().color = new Color(c.r, c.g, c.b, 128/255f);
+                }
+            }
+
+        }
+    }
+
+    public void SetEnable(bool enable)
+    {
+        if (ID == "baozi")
+        {
+            Debug.LogError("activeactiveactiveactiveactive====" + enable);
+        }
+        _enable = enable;
+        GetComponent<Button>().interactable = enable;
+        if (GetComponentInChildren<Text>() != null)
+        {
+            if (!enable)
+            {
+                GetComponentInChildren<Text>().color = new Color(200 / 255f, 200 / 255f, 200 / 255f, 128 / 255f);
+            }
+            else
+            {
+                GetComponentInChildren<Text>().color = Color.white;
+            }
+        }
+    }
+
+    public void AddToggleEvent(UnityAction<bool> call)
+    {
+        Toggle tog = GetComponent<Toggle>();
+        if (tog != null)
+        {
+            tog.onValueChanged.AddListener(call);
+        }
+        else
+        {
+            Debug.Log("this isn't Toggle");
+        }
+
+    }
+
+    public void SetToggleEnable(bool enable)
+    {
+        Toggle tog = GetComponent<Toggle>();
+        if (tog != null)
+        {
+            tog.interactable = enable;
+        }
+        else
+        {
+            Debug.Log("this isn't Toggle");
+        }
+    }
+   
+    public void Close()
+    {
+
+        if (!this)
+        {
+            return;
+        }
+
+
+        Children.Clear();
+        if (this.gameObject != null)
+        {
+            Destroy(this.gameObject);
+        }
+        if (Parent != null)
+        {
+            Parent.Children.Remove(this);
+            if (Parent.GetComponent<ScrollRect>() != null)
+            {
+                GridLayoutGroup glg = Parent.GetComponentInChildren<GridLayoutGroup>();
+                if (glg != null)
+                {
+                    RectTransform rt = glg.GetComponent<RectTransform>();
+                    if (Parent.Children.Count > 4)
+                    {
+                        rt.sizeDelta = new Vector2(rt.sizeDelta.x, (Parent.Children.Count - 5) * (glg.cellSize.y + glg.spacing.y));
+                        rt.localPosition = new Vector3(rt.localPosition.x, 0, rt.localPosition.z);
+                    }
+                    else
+                    {
+                        rt.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
+                    }
+                }
+
+            }
+        }
+        if (ClosedEvent != null)
+        {
+            ClosedEvent();
+            ClosedEvent = null;
+        }
+        Destroyed = true;
+        Destroy(this);
+    }
+
+    /// <summary>
+    /// 加载已经完成的预制品
+    /// </summary>
+    /// <param name="sourcename"></param>
+    public UIProperty AddChild(string sourcename)
+    {
+        GameObject widget = UIBase.ShowUI(sourcename);
+        UIProperty hup = widget.GetComponent<UIProperty>();
+        hup.Parent = this;
+        this.Children.Add(hup);
+        if (!Destroyed)
+        {
+            if (this.GetComponent<ScrollRect>() == null)
+            {
+                hup.gameObject.transform.SetParent(transform, false);
+            }
+            else
+            {
+                if (ScrollGrid == null)
+                {
+                    ScrollGrid = FindObjectOfType<GridLayoutGroup>();
+                }
+
+                //if (glg == null)
+                //{
+                //    foreach (Transform t in transform)
+                //    {
+                //        if (t.name == "")
+                //        {
+                //            hup.gameObject.transform.SetParent(t, false);
+                //            return hup;
+                //        }
+                //    }
+
+                //    return hup;
+                //}
+                RectTransform rt = ScrollGrid.GetComponent<RectTransform>();
+                hup.gameObject.transform.SetParent(ScrollGrid.transform, false);
+                if (Children.Count > scrollCount)
+                {
+                    float t = (Children.Count - scrollCount - 1) * (ScrollGrid.cellSize.y + ScrollGrid.spacing.y);
+                    rt.sizeDelta = new Vector2(rt.sizeDelta.x, (Children.Count - scrollCount - 1) * (ScrollGrid.cellSize.y + ScrollGrid.spacing.y));
+                }
+                else
+                {
+                    rt.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
+                }
+
+            }
+
+            hup.ID = this.ID + "_" + hup.gameObject.name;
+        }
+        else
+        {
+            hup.ID = hup.gameObject.name;
+        }
+        return hup;
+    }
+
+    //滚动条初始化
+    public void InitScrollView()
+    {
+        StartCoroutine(reserscrollview());
+    }
+
+    IEnumerator reserscrollview()
+    {
+        ScrollRect sr = GetComponent<ScrollRect>();
+        yield return new WaitForSeconds(0.1f);
+        GridLayoutGroup glg = GetComponentInChildren<GridLayoutGroup>();
+        RectTransform rt = glg.GetComponent<RectTransform>();
+        Debug.Log("item.Children.Count=" + Children.Count + "item.scrollCount=" + scrollCount);
+        if (Children.Count > scrollCount)
+        {
+            float t = (Children.Count - scrollCount - 1) * (glg.cellSize.y + glg.spacing.y);
+
+            sr.content.sizeDelta = new Vector2(rt.sizeDelta.x, (Children.Count - scrollCount - 1) * (glg.cellSize.y + glg.spacing.y)/glg.constraintCount);
+        }
+        else
+        {
+            sr.content.sizeDelta = new Vector2(rt.sizeDelta.x, 0);
+        }
+    }
+
+    /// <summary>
+    /// 设置锚点
+    /// </summary>
+    /// <param name="pivot"></param>
+    public void SetAnchor( Pivot pivot)
+    {
+        switch (pivot)
+        {
+            case Pivot.TopLeft:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.Top:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.TopRight:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.Left:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.Center:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMax = new Vector2(0.5f, 0.5f);
+                break;
+            case Pivot.Right:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.BottomLeft:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.Bottom:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            case Pivot.BottomRight:
+                rectTransform.pivot = new Vector2(0.5f, 0.5f);
+                rectTransform.anchorMin = new Vector2(0, 1);
+                rectTransform.anchorMax = new Vector2(0, 1);
+                break;
+            default:
+                break;
+        }
+        rectTransform.localPosition = Vector3.zero;
+        Debug.Log("rectTransform.localToWorldMatrix===" + rectTransform.localPosition);
+    }
+
+    public void CheckChild()
+    {
+        List<UIProperty> dellist = new List<UIProperty>();
+        foreach (UIProperty child in Children)
+        {
+            if (child == null
+                || child.gameObject == null
+                || child.transform.parent != this.transform)
+            {
+                dellist.Add(child);
+            }
+            if (child != null && child.gameObject != null)
+            {
+                child.CheckChild();
+            }
+
+        }
+        if (dellist.Count > 0)
+        {
+            foreach (UIProperty dc in dellist)
+            {
+                Children.Remove(dc);
+            }
+        }
+
+        foreach (Transform t in transform)
+        {
+            UIProperty up =t.GetComponent<UIProperty>();
+            if (up != null && !Children.Contains(up))
+            {
+                Children.Add(up);
+                up.Parent = this;
+            }
+        }
+    }
+
+	public void CheckChild2()
+	{
+		Children.Clear();
+		foreach (Transform t in transform)
+		{
+			UIProperty up =t.GetComponent<UIProperty>();
+			if (up != null)
+			{
+				up.CheckChild2();
+				Children.Add(up);
+				up.Parent = this;
+			}
+		}
+	}
+
+    /// <summary>
+    /// 立即关闭UI
+    /// </summary>
+    public void CloseImmediate()
+    {
+
+        if (!this)
+        {
+            return;
+        }
+        Children.Clear();
+        if (this.gameObject != null)
+        {
+            DestroyImmediate(this.gameObject);
+        }
+        if (Parent != null)
+        {
+            Parent.Children.Remove(this);
+        }
+        if (ClosedEvent != null)
+        {
+            ClosedEvent();
+            ClosedEvent = null;
+        }
+        Destroyed = true;
+        DestroyImmediate(this);
+    }
+
+    /// <summary>
+    /// 清空该UI下的所有子UI
+    /// </summary>
+    public void Clean()
+    {
+        if (Children.Count > 0)
+        {
+            foreach (UIProperty child in Children)
+            {
+                if (child != null && child.gameObject != null)
+                {
+                    Destroy(child.gameObject);
+                }
+                Destroy(child);
+            }
+            Children.Clear();
+        }
+    }
+}

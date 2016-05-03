@@ -1,0 +1,22 @@
+﻿using UnityEngine;
+using System.Collections;
+using UnityEngine.UI;
+
+public class GameInit : MonoBehaviour {
+    private GameObject StartShow;
+    void Awake() {
+        GameTools.SetScreenModify();// 设置分辨率参数
+    }
+	void Start () {
+        Init();
+        
+	}
+    private void Init() {
+        transform.FindChild("scale").localScale = new Vector3(GameTools.Scale, GameTools.Scale, GameTools.Scale);
+        GameTools.WarnText = transform.FindChild("scale/warn").GetComponent<Text>();
+        StartShow = transform.FindChild("scale/start").gameObject;
+        GameTools.InitNavigations(StartShow);
+        GameTools.Wait = transform.FindChild("scale/wait").gameObject;
+        GameTools.Map = transform.FindChild("Map").gameObject;
+    }
+}

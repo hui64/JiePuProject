@@ -1,0 +1,41 @@
+﻿using UnityEngine;
+using System.Collections;
+
+public class UIItem  {
+    //每个组件的根节点
+    public UIProperty Root = null;
+    private bool _active = true;
+    public bool Acitve
+    {
+        set
+        {
+            SetActive(value);
+        }
+        get
+        {
+            return _active;
+        }
+    }
+    /// <summary>
+    /// 将每个功能以控件形式展示
+    /// </summary>
+    public UIItem()
+    { 
+    
+    }
+
+    /// <summary>
+    /// 退出控件
+    /// </summary>
+    public void Exit()
+    {
+        if (Root != null)
+            Root.Close();
+    }
+
+    public void SetActive(bool active)
+    {
+        Root.gameObject.SetActive(active);
+        _active = active;
+    }
+}
