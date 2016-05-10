@@ -87,6 +87,7 @@ public class LoadAssets : BaseMonoBehaviour {
     private void ReplaceLocalRes(string fileName, byte[] data)
     {
         print("保存文件" + fileName);
+        print(data.Length);
         //使用www读取 流应该有问题
         AssetPath.CreateFile(fileName);
         FileStream stream = new FileStream(fileName, FileMode.Create);

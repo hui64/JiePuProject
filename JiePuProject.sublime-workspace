@@ -1,0 +1,331 @@
+{
+	"auto_complete":
+	{
+		"selected_items":
+		[
+			[
+				"ge",
+				"GetComponent<T>()	T"
+			],
+			[
+				"ga",
+				"GameObject	GameObject"
+			],
+			[
+				"Get",
+				"GetFullURL(string fileName)	string"
+			],
+			[
+				"game",
+				"GameTools"
+			],
+			[
+				"Eve",
+				"EventTrigger"
+			]
+		]
+	},
+	"buffers":
+	[
+		{
+			"contents": "",
+			"settings":
+			{
+				"buffer_size": 0,
+				"line_ending": "Unix"
+			}
+		}
+	],
+	"build_system": "",
+	"build_system_choices":
+	[
+	],
+	"build_varint": "",
+	"command_palette":
+	{
+		"height": 392.0,
+		"last_filter": "re",
+		"selected_items":
+		[
+			[
+				"re",
+				"Package Control: Remove Package"
+			],
+			[
+				"in",
+				"Package Control: Install Package"
+			],
+			[
+				" re",
+				"Package Control: Remove Package"
+			],
+			[
+				"i",
+				"Package Control: Install Package"
+			],
+			[
+				"ins",
+				"Package Control: Install Package"
+			],
+			[
+				"remo",
+				"Package Control: Remove Package"
+			],
+			[
+				"",
+				"Package Control: Add Channel"
+			],
+			[
+				"inst",
+				"Package Control: Install Package"
+			],
+			[
+				"ii",
+				"Package Control: Satisfy Dependencies"
+			]
+		],
+		"width": 449.0
+	},
+	"console":
+	{
+		"height": 181.0,
+		"history":
+		[
+			"import urllib.request,os; pf = 'Package Control.sublime-package'; ipp = sublime.installed_packages_path(); urllib.request.install_opener( urllib.request.build_opener( urllib.request.ProxyHandler()) ); open(os.path.join(ipp, pf), 'wb').write(urllib.request.urlopen( 'http://sublime.wbond.net/' + pf.replace(' ','%20')).read())"
+		]
+	},
+	"distraction_free":
+	{
+		"menu_visible": true,
+		"show_minimap": false,
+		"show_open_files": false,
+		"show_tabs": false,
+		"side_bar_visible": false,
+		"status_bar_visible": false
+	},
+	"expanded_folders":
+	[
+		"/Users/hui64/UnityProject/JiePuProject"
+	],
+	"file_history":
+	[
+		"/Users/hui64/UnityProject/BaseProject/Assets/Script/Tools/FileManager.cs",
+		"/Users/hui64/UnityProject/BaseProject/Assets/Script/Tools/GameTools.cs",
+		"/Users/hui64/UnityProject/BaseProject/Assets/Script/Base/BaseMonoBehaviour.cs",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/Default/Default (OSX).sublime-keymap",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/User/Default (OSX).sublime-keymap",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/Default/Preferences.sublime-settings",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/User/UnityC#.sublime-settings",
+		"/Users/hui64/UnityProject/BaseProject/BaseProject.sublime-project",
+		"/Users/hui64/Documents/unityProject/BaseProject/Assets/Script/StartShop.cs",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/User/JSON.sublime-settings",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/User/Preferences.sublime-settings",
+		"/Users/hui64/Documents/unityProject/BaseProject/BaseProject.sublime-project",
+		"/Users/hui64/Documents/unityProject/BaseProject/Assets/Script/GameTools.cs",
+		"/Users/hui64/baidu/shopping/shopping.sublime-project",
+		"/Users/hui64/baidu/shopping/Assets/Script/LoopGrid.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/PlayerMoive.cs",
+		"/Users/hui64/baidu/shopping/Assets/GameTools.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/EventTriggerListener.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/DragPanel.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/DragPage.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/LoopScrollRect.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/AnotherScrollRect.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/Register.cs",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/User/Plain text.sublime-settings",
+		"/Users/hui64/baidu/shopping/Assets/Script/GameInit.cs",
+		"/Users/hui64/baidu/shopping/Assets/Script/UIStore.cs",
+		"/Users/hui64/Documents/hui/shop/Unity-iPhone Tests/Unity_iPhone_Tests.m",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/CTags/CTags.sublime-settings",
+		"/Users/hui64/Library/Application Support/Sublime Text 3/Packages/User/CTags.sublime-settings",
+		"/System/Library/Frameworks/CoreText.framework/Versions/A/Resources/DefaultFontFallbacks.plist"
+	],
+	"find":
+	{
+		"height": 32.0
+	},
+	"find_in_files":
+	{
+		"height": 0.0,
+		"where_history":
+		[
+		]
+	},
+	"find_state":
+	{
+		"case_sensitive": false,
+		"find_history":
+		[
+			"Tab",
+			"space",
+			"enter",
+			"space",
+			"enter",
+			"return",
+			"enter",
+			"command+",
+			"command+p",
+			"command",
+			"enter",
+			"side_bar",
+			"报简-隶",
+			"STHeitiSC-Light",
+			"STHeiti SC",
+			"zh-Hans",
+			"STHeitiTC-Light",
+			"zh-Hant",
+			"STHeiti TC",
+			"报简-隶",
+			"Sc-Light",
+			"zh-hans",
+			"STHeiti",
+			"STHeitiTc-Light",
+			"STHeiti",
+			"STHeiti\n\n"
+		],
+		"highlight": true,
+		"in_selection": false,
+		"preserve_case": false,
+		"regex": false,
+		"replace_history":
+		[
+			"微软雅黑",
+			"报简-隶",
+			"娃娃体-简",
+			"",
+			"报简-隶"
+		],
+		"reverse": false,
+		"show_context": true,
+		"use_buffer2": true,
+		"whole_word": false,
+		"wrap": true
+	},
+	"groups":
+	[
+		{
+			"selected": 0,
+			"sheets":
+			[
+				{
+					"buffer": 0,
+					"semi_transient": false,
+					"settings":
+					{
+						"buffer_size": 0,
+						"regions":
+						{
+						},
+						"selection":
+						[
+							[
+								0,
+								0
+							]
+						],
+						"settings":
+						{
+							"auto_name": "",
+							"syntax": "Packages/Text/Plain text.tmLanguage"
+						},
+						"translation.x": 0.0,
+						"translation.y": 0.0,
+						"zoom_level": 1.0
+					},
+					"stack_index": 0,
+					"type": "text"
+				}
+			]
+		}
+	],
+	"incremental_find":
+	{
+		"height": 32.0
+	},
+	"input":
+	{
+		"height": 39.0
+	},
+	"layout":
+	{
+		"cells":
+		[
+			[
+				0,
+				0,
+				1,
+				1
+			]
+		],
+		"cols":
+		[
+			0.0,
+			1.0
+		],
+		"rows":
+		[
+			0.0,
+			1.0
+		]
+	},
+	"menu_visible": true,
+	"output.exec":
+	{
+		"height": 148.0
+	},
+	"output.find_results":
+	{
+		"height": 0.0
+	},
+	"output.variable_get":
+	{
+		"height": 148.0
+	},
+	"pinned_build_system": "",
+	"project": "JiePuProject.sublime-project",
+	"replace":
+	{
+		"height": 60.0
+	},
+	"save_all_on_build": true,
+	"select_file":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_project":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"select_symbol":
+	{
+		"height": 0.0,
+		"last_filter": "",
+		"selected_items":
+		[
+		],
+		"width": 0.0
+	},
+	"selected_group": 0,
+	"settings":
+	{
+	},
+	"show_minimap": true,
+	"show_open_files": false,
+	"show_tabs": true,
+	"side_bar_visible": true,
+	"side_bar_width": 214.0,
+	"status_bar_visible": true,
+	"template_settings":
+	{
+	}
+}

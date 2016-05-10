@@ -35,7 +35,7 @@ public class UpLoadToSever : MonoBehaviour {
             WWWForm form = new WWWForm();
             byte[] infos = www.bytes;
             print(www.bytes.Length);
-            form.AddBinaryData("aaaa", www.bytes, AssetPath.GetPathOutBegin(info, "assetBundle"));
+            form.AddBinaryData("aaaa", www.bytes, "/" + AssetPath.GetPathOutBegin(info, "assetBundle"));
             WWW upLoad = new WWW(AssetPath.UpURL, form);
             yield return upLoad;
         }

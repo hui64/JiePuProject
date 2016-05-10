@@ -21,6 +21,7 @@ public class GameTools{
     public const float ScreenY = 16;
     public const float TextureX = 720f;
     public const float TextureY = 1280f;
+    public static bool IsIphone = true;
     ///===============================================================================================
     //运行数据
     ///===============================================================================================
@@ -279,19 +280,28 @@ public class GameTools{
         assetbundle.Unload(false);
     }
     //获取assetbunle里的资源
-    public static T GetAsset<T>(AssetBundle assetbundle, Finish<T> finish = null) {
-        T[] info = assetbundle.LoadAllAssets<Object>() as T[];
+    public static Object GetAsset(AssetBundle assetbundle, Finish<Object> finish = null) {
+        Object[] info = assetbundle.LoadAllAssets<Object>();
         ClearAssetBundle(assetbundle);
         if (finish != null) {
             finish(info[0]);
         }
         return info[0];
     }
+    public static GameObject GetAssetGameObject(AssetBundle assetbundle, Finish<GameObject> finish = null) {
+        GameObject[] gos = assetbundle.LoadAllAssets<GameObject>();
+        ClearAssetBundle(assetbundle);
+        if (finish != null)
+        {
+            finish(gos[0]);
+        }
+        return gos[0];
+    }
     //=====================================================================================
     //加载assetbunle里的所有资源(没有跟资源添加引用, 如果垃圾回收不能回收, 还需重新设计)
     //======================================================================================
     public static void LoadAllAssets(AssetBundle assetbundle) {
-        Debug.LogWarning("检测内存, 可能会有内存泄漏");
+        Debug.Log("检测内存, 可能会有内存泄漏");
         assetbundle.LoadAllAssets();
     }
 }

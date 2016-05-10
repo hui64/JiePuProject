@@ -13,11 +13,11 @@ public class AssetPath
     public static string DepPath = "/assetBundle";                                                   //依赖关系地址
     public static readonly string EndPath = ".assetbundle";
     private static readonly string VersionName = "/versionBundle/version.txt";                       //版本相对路径文件名
-    public static readonly string UpURL = "http://192.168.0.135:8088/assets/upload/";              //资源服务器上传地址
-    public static readonly string DownURL = "http://192.168.0.135:8088/assets/download?filename=";       //资源服务器下载地址
+    public static readonly string UpURL = "http://192.168.1.101:8088/assets/upload/";              //资源服务器上传地址
+    public static readonly string DownURL = "http://192.168.1.101:8088/assets/download?filename=";       //资源服务器下载地址
     //public static readonly string UpURL = "http://192.168.0.138:8088/assets/upload/";              //资源服务器上传地址
     //public static readonly string DownURL = "http://192.168.0.138:8088/assets/download?filename=";
-    public static string AssetBundlePath = Application.temporaryCachePath;                           //assetbundle资源包保存路径
+    public static string AssetBundlePath = Application.persistentDataPath;                           //assetbundle资源包保存路径
     public static string VersionPath = Application.dataPath + VersionName;
     public static string VersionBundlePath = AssetBundlePath + ChangPathEnd(VersionName, EndPath);
     public static string VersionBundleURL = DownURL + ChangPathEnd(VersionName, EndPath);
@@ -46,9 +46,13 @@ public class AssetPath
         int i = myString.IndexOf(begin) + begin.Length;
         return myString.Substring(i);
     }
+    //从第index个字符开始获取
+    public static string GetStringAtIndex(string myString, int index){
+        return myString.Substring(index);
+    }
     public static string GetFileName(string fullPath)
     {
-        string myString = GetPathOutBegin(fullPath, "Assets");
+        string myString = GetPathOutBegin(fullPath, "Assets/");
         return ChangPathEnd(myString, EndPath);
     }
     public static string ChangPathEnd(string path, string end) {
@@ -57,7 +61,7 @@ public class AssetPath
     //根据文件名获取本地资源总路径
     public static string GetFullAssetBundlePath(string path)
     {
-        return AssetBundlePath + ReplaceString(path);
+        return AssetBundlePath + "/" + ReplaceString(path);
     }
     //根据文件名获取本地资源www总路径
     public static string GetWWWAssetBundlePath(string path) {
@@ -66,7 +70,7 @@ public class AssetPath
     //根据文件名获取服务器资源地址
     public static string GetDownLoadURL(string path)
     {
-        return DownURL + ReplaceString(path);
+        return DownURL + "/" + ReplaceString(path);
     }
     public static string ReplaceString(string path) {
         return (StringTool.Trim(path)).Replace(@"\", @"/");
@@ -119,7 +123,7 @@ public class AssetPath
     }
     public static string GetWWWPath(string path)
     {
-        return "file:///" + path.Replace(@"\", @"/");
+        return "file://" + path.Replace(@"\", @"/");
     }
     public static void GetFilePathsAndMD5(string fullPath, Dictionary<string, string> versions)
     {

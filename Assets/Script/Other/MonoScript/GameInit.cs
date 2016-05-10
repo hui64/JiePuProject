@@ -10,36 +10,20 @@ public class GameInit : MonoBehaviour {
     private GameObject Scale;
     void Awake() {
         Instance = this;
-        GameTools.SetScreenModify();// 设置分辨率参数
+        Init();
     }
 	void Start () {
-        //Init();
+        
 	}
     void Update() {
-        //if (Input.anyKeyDown)
-        //    GameTools.QuitWarn.SetActive(false);
-        //if (Input.GetKeyDown(KeyCode.Escape))
-        //    if(!GameTools.IsOpenSet)
-        //        GameTools.ClickBack(gameObject);
+        
     }
     private void Init() {
-        Scale = transform.FindChild("scale").gameObject;
-        Scale.transform.localScale = new Vector3(GameTools.Scale, GameTools.Scale, GameTools.Scale);
-        GameTools.WarnText = transform.FindChild("scale/warn").GetComponent<Text>();
-        GameTools.QuitWarn = transform.FindChild("scale/warnquit").gameObject;
-        StartShow = transform.FindChild("scale/start").gameObject;
-        GameTools.InitNavigations(StartShow);
-        GameTools.Wait = transform.FindChild("scale/wait").gameObject;
-        GameTools.Map = transform.FindChild("Map/map").gameObject;
-        MainShow = transform.FindChild("scale/main").gameObject;
-        EventTriggerListener.Get(transform.FindChild("Map/top/mapbutton").gameObject).onClick= CloseMap;
-        EventTriggerListener.Get(transform.FindChild("Map/bottom/menu0/5km").gameObject).onClick = Set5km;
-        EventTriggerListener.Get(transform.FindChild("Map/bottom/menu0/10km").gameObject).onClick = Set10km;
-        EventTriggerListener.Get(transform.FindChild("Map/bottom/menu0/30km").gameObject).onClick = Set30km;
-        EventTriggerListener.Get(transform.FindChild("Map/bottom/menu0/city").gameObject).onClick = SetCity;
-        EventTriggerListener.Get(transform.FindChild("Map/bottom/menu0/country").gameObject).onClick = Setcountry;
-        EventTriggerListener.Get(transform.FindChild("Map/bottom/oldpos").gameObject).onClick = Setoldpos;
-        
+        #if UNITY_ANDROID
+        GameTools.IsIphone = false;
+        #elif UNITY_IPHONE 
+        GameTools.IsIphone = true;
+        #endif
     }
     public void OpenMap()
     {

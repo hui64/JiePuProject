@@ -8,7 +8,9 @@ public class Build{
     static void CreateAssets()
     {
         Dictionary<string, string> fileData = new Dictionary<string, string>();
-        Directory.Delete(AssetPath.StreamingPath, true);
+        if(Directory.Exists(AssetPath.StreamingPath))
+            Directory.Delete(AssetPath.StreamingPath, true);
+            
         Directory.CreateDirectory(AssetPath.StreamingPath);
         AssetPath.NewText(AssetPath.VersionPath);
         List<string> assetFullPaths = AssetPath.GetNeedBuildPath();
@@ -34,7 +36,12 @@ public class Build{
             buildMap[i].assetBundleName = AssetPath.GetFileName(path[0]);   //打包的资源包名称
             Debug.Log(AssetPath.GetFileName(path[0]));
         }
+        Debug.Log(AssetPath.StreamingPath);
+        #if UNITY_ANDROID
         BuildPipeline.BuildAssetBundles(AssetPath.StreamingPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.Android);
+        #elif UNITY_IPHONE 
+        BuildPipeline.BuildAssetBundles(AssetPath.StreamingPath, buildMap, BuildAssetBundleOptions.None, BuildTarget.iOS);
+        #endif
         AssetDatabase.Refresh();                                             //刷新编辑器
     }
 }

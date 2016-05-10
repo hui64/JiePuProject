@@ -1,12 +1,12 @@
 ManifestFileVersion: 0
-CRC: 1986309559
+CRC: 3891608076
 Hashes:
   AssetFileHash:
     serializedVersion: 2
-    Hash: 1b872c5057cc735bb9b6ecf16d887a6e
+    Hash: 9ffab10de5a1ad8cd8e6812db6537554
   TypeTreeHash:
     serializedVersion: 2
-    Hash: 1e5d526767636cba74d5f54d60a1fcc9
+    Hash: 517226eb32b411fb56cc0117798b8112
 HashAppended: 0
 ClassTypes:
 - Class: 1
@@ -50,4 +50,4 @@ ClassTypes:
 Assets:
 - Assets/PrefabBundle/UIPrefab/LoginUI.prefab
 Dependencies:
-- E:/JiePuProject/Assets/StreamingAssets/assetBundle/atexturesbundle/login/bg.assetbundle
+- /Users/hui64/UnityProject/JiePuProject/Assets/StreamingAssets/assetBundle/texturebundle/login/bg.assetbundle

@@ -13,7 +13,7 @@ public class Share : MonoBehaviour {
     void Start()
     {
         //定义回调
-        share.shareHandler = ShareResultHandler;
+        //share.shareHandler = ShareResultHandler;
     }
     void ShareResultHandler(int reqID, ResponseState state, PlatformType type, Hashtable result)
     {

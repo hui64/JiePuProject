@@ -2,36 +2,36 @@ ManifestFileVersion: 0
 AssetBundleManifest:
   AssetBundleInfos:
     Info_0:
-      Name: /atexturesbundle/login/bg.assetbundle
-      Dependencies: {}
-    Info_1:
-      Name: /prefabbundle/uiprefab/loginui.assetbundle
+      Name: prefabbundle/uiprefab/loginui.assetbundle
       Dependencies:
-        Dependency_0: /atexturesbundle/login/bg.assetbundle
+        Dependency_0: texturebundle/login/bg.assetbundle
+    Info_1:
+      Name: prefabbundle/uiprefab/map.assetbundle
+      Dependencies: {}
     Info_2:
-      Name: /prefabbundle/uiprefab/map.assetbundle
+      Name: prefabbundle/uiprefab/own.assetbundle
       Dependencies: {}
     Info_3:
-      Name: /prefabbundle/uiprefab/own.assetbundle
+      Name: prefabbundle/uiprefab/register.assetbundle
       Dependencies: {}
     Info_4:
-      Name: /prefabbundle/uiprefab/register.assetbundle
+      Name: prefabbundle/uiprefab/start.assetbundle
       Dependencies: {}
     Info_5:
-      Name: /prefabbundle/uiprefab/start.assetbundle
+      Name: prefabbundle/uiprefab/store.assetbundle
       Dependencies: {}
     Info_6:
-      Name: /prefabbundle/uiprefab/store.assetbundle
+      Name: prefabbundle/uiprefab/wait.assetbundle
       Dependencies: {}
     Info_7:
-      Name: /prefabbundle/uiprefab/wait.assetbundle
+      Name: prefabbundle/uiprefab/warn.assetbundle
       Dependencies: {}
     Info_8:
-      Name: /prefabbundle/uiprefab/warn.assetbundle
+      Name: prefabbundle/uiprefab/warnquit.assetbundle
       Dependencies: {}
     Info_9:
-      Name: /prefabbundle/uiprefab/warnquit.assetbundle
+      Name: texturebundle/login/bg.assetbundle
       Dependencies: {}
     Info_10:
-      Name: /versionbundle/version.assetbundle
+      Name: versionbundle/version.assetbundle
       Dependencies: {}

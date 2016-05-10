@@ -18,9 +18,9 @@ namespace cn.sharesdk.unity3d
 		//配置ShareSDK AppKey
 		//�?此处区分仅为demo测试而区分，实际使用时可以不区分安卓或iOS
 		#if UNITY_ANDROID
-		public string appKey = "androidv1101";
+		private string appKey = "androidv1101";
 		#elif UNITY_IPHONE
-		public string appKey = "iosv1101";
+		private string appKey = "iosv1101";
 		#endif
 		public DevInfoSet devInfo;
 		public ShareSDKImpl shareSDKUtils;

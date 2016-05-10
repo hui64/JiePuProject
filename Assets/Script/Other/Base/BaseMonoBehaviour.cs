@@ -21,8 +21,10 @@ public class BaseMonoBehaviour : MonoBehaviour
     public void DownLoadPrefab(string name, GameTools.Finish<GameObject> finish) {
         string prefabName = AssetPath.PrefabPath + name + AssetPath.EndPath;
         string fullPath = AssetPath.GetWWWPath(AssetPath.AssetBundlePath + prefabName);
+        print(fullPath);
         DownLoad(fullPath, delegate (WWW www)
         {
+            print(www.assetBundle);
             GetAssetPrefab(prefabName, www, finish);
             ClearAssetDatas();
         });
@@ -56,7 +58,7 @@ public class BaseMonoBehaviour : MonoBehaviour
     {
         if (string.IsNullOrEmpty(www.error))
         {
-            return GameTools.GetAsset<TextAsset>(www.assetBundle).text;
+            return (GameTools.GetAsset(www.assetBundle) as TextAsset).text;
         }
         return "";
     }
@@ -65,7 +67,7 @@ public class BaseMonoBehaviour : MonoBehaviour
     {
         if (string.IsNullOrEmpty(www.error))
         {
-           return GameTools.GetAsset<Sprite>(www.assetBundle);
+           return GameTools.GetAsset(www.assetBundle) as Sprite;
         }
         return null;
     }
@@ -77,7 +79,9 @@ public class BaseMonoBehaviour : MonoBehaviour
             //先加载依赖资源
             LoadDepAsset(prefabName, delegate ()
             {
-                GameTools.GetAsset(www.assetBundle, finish);
+                GameTools.GetAsset(www.assetBundle, delegate(Object myObj) {
+                    finish((GameObject)myObj);
+                });
             });
         }
     }
@@ -94,8 +98,11 @@ public class BaseMonoBehaviour : MonoBehaviour
     //加载依赖资源
     public void LoadDepAsset(string name, GameTools.Finish finish)
     {
+        if(GameTools.IsIphone)
+            name = AssetPath.GetStringAtIndex(name, 1);
         string[] paths = AssetPath.AssetDep.GetAllDependencies(name);
         List<string> needDownLoadFiles = new List<string>();
+        print(name);
         foreach (string info in paths)
         {
             print("依赖资源: " + info);
@@ -120,7 +127,9 @@ public class BaseMonoBehaviour : MonoBehaviour
         }
         DownLoad(fileName, delegate (WWW w)
         {
+            print("加载依赖资源: " + fileName);
             GameTools.LoadAllAssets(w.assetBundle);
+           
             AssetDatas.Add(fileName, w.assetBundle);
             DownLoadRes(needDownLoadFiles, finish);
         });
@@ -131,7 +140,7 @@ public class BaseMonoBehaviour : MonoBehaviour
         yield return www;
         if (!string.IsNullOrEmpty(www.error))
         {
-            Debug.LogError(url);
+            Debug.Log(url);
             Debug.Log(www.error);
         }
         else {
@@ -165,7 +174,7 @@ public class BaseMonoBehaviour : MonoBehaviour
         {
             GameTools.ClearAssetBundle(info.Value);
         }
-        AssetDatas.Clear();
+        //AssetDatas.Clear();
     }
     void OnDestroy() {
         StopAllCoroutines();
